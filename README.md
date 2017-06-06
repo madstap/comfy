@@ -23,6 +23,10 @@ Require like this:
   [madstap.comfy.core :as comfy]))
 ```
 
+## API docs
+
+[https://madstap.github.io/comfy/madstap.comfy.core.html](https://madstap.github.io/comfy/madstap.comfy.core.html)
+
 ## License
 
 Copyright © 2017 Aleksander Madland Stapnes
