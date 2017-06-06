@@ -1,10 +1,10 @@
 (ns madstap.comfy.core
   "A small collection of functions and macros that (mostly) wouldn't
   be out of place in clojure.core."
+  #?(:cljs (:require-macros [madstap.comfy.core]))
   (:require
    [clojure.spec.alpha :as s]
-   [clojure.core.specs.alpha :as core-specs]))
-
+   #?(:clj [clojure.core.specs.alpha])))
 
 (def ^:private nilable-map? (some-fn map? nil?))
 
@@ -81,18 +81,18 @@
      [& forms]
      `(fn [x#] (->> x# ~@forms))))
 
+#?(:clj
+   (s/def ::seq-exprs
+     (s/and vector?
+            (s/* (s/alt :binding :clojure.core.specs.alpha/binding
+                        :let   (s/cat :k #{:let}   :bindings :clojure.core.specs.alpha/bindings)
+                        :when  (s/cat :k #{:when}  :expr any?)
+                        :while (s/cat :k #{:while} :expr any?)))
+            #(contains? (set (map key %)) :binding))))
 
-(s/def ::seq-exprs
-  (s/and vector?
-         (s/* (s/alt :binding ::core-specs/binding
-                     :let   (s/cat :k #{:let}   :bindings ::core-specs/bindings)
-                     :when  (s/cat :k #{:when}  :expr any?)
-                     :while (s/cat :k #{:while} :expr any?)))
-         #(contains? (set (map key %)) :binding)))
-
-
-(s/fdef forv
-  :args (s/cat :seq-exprs ::seq-exprs, :body any?))
+#?(:clj
+   (s/fdef forv
+     :args (s/cat :seq-exprs ::seq-exprs, :body any?)))
 
 #?(:clj
    (defmacro forv
@@ -101,9 +101,9 @@
      [seq-exprs body-expr]
      `(vec (for ~seq-exprs ~body-expr))))
 
-
-(s/fdef for-map
-  :args (s/cat :seq-exprs ::seq-exprs, :key-expr any?, :val-expr any?))
+#?(:clj
+   (s/fdef for-map
+     :args (s/cat :seq-exprs ::seq-exprs, :key-expr any?, :val-expr any?)))
 
 #?(:clj
    (defmacro for-map
