@@ -126,8 +126,10 @@
   and args as the rest.
 
   Almost the opposite of partial, the difference being that the returned
-  function can only take one argument, the \"thing\" that's being operated upon.
-  Like with assoc, get, conj, etc. This is to reduce confusion.
+  function takes exactly one argument, the \"thing\" that's being operated upon,
+  instead of an arbitrary number of arguments. This is to reduce confusion.
+  Meant to be used with assoc, get, conj, etc. that all take the \"thing\"
+  as the first argument.
 
   The name is taken from haskell, although it's not
   exactly equivalent to the haskell version."
