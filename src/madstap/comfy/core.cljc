@@ -1,6 +1,7 @@
 (ns madstap.comfy.core
   "A small collection of functions and macros that (mostly) wouldn't
   be out of place in clojure.core."
+  #?(:cljs (:require-macros [madstap.comfy.core]))
   (:require
    [clojure.spec.alpha :as s]
    #?(:clj [clojure.core.specs.alpha])))
