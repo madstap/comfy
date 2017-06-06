@@ -119,3 +119,18 @@
      {:style/indent 1, :added "0.1.0"}
      [seq-exprs key-expr val-expr]
      `(into {} (for ~seq-exprs [~key-expr ~val-expr]))))
+
+(defn flip
+  "Takes a function f and arguments args. Returns a function of
+  one argument x that is f applied with x as it's first argument
+  and args as the rest.
+
+  Almost the opposite of partial, the difference being that the returned
+  function can only take one argument, the \"thing\" that's being operated upon.
+  Like with assoc, get, conj, etc. This is to reduce confusion.
+
+  The name is taken from haskell, although it's not
+  exactly equivalent to the haskell version."
+  {:added "0.1.1"}
+  [f & args]
+  (fn [x] (apply f x args)))

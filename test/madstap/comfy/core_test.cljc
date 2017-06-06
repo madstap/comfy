@@ -61,3 +61,6 @@
          (sut/deep-merge-with + {:foo {:bar 1}} {:foo {:bar 1 :baz 2}})))
   (is (= {:foo {:bar 2 :baz 2}}
          (sut/deep-merge-with + {:foo {:bar 1}} {:foo {:bar 1 :baz 2}} {:foo nil}))))
+
+(deftest flip-test
+  (is (= {:foo 1} ((sut/flip assoc :foo 1) {}))))
