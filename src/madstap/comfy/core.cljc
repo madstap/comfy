@@ -15,6 +15,7 @@
 
 (defn deep-merge
   "Like merge, but also merges nested maps under the same key."
+  {:added "0.1.0"}
   [& ms]
   (apply merge-with
          (fn [v1 v2]
@@ -30,6 +31,7 @@
 
 (defn deep-merge-with
   "Like merge-with, but also merges nested maps under the same key."
+  {:added "0.1.0"}
   [f & ms]
   (apply merge-with
          (fn [v1 v2]
@@ -43,6 +45,7 @@
 
 (defn one?
   "Returns true if x is one, else false."
+  {:added "0.1.0"}
   [x] (== 1 x))
 
 
@@ -50,6 +53,7 @@
 
 (defn two?
   "Returns true if x is two, else false."
+  {:added "0.1.0"}
   [x] (== 2 x))
 
 
@@ -60,6 +64,7 @@
 
 (defn conj-some
   "Conj a value into a coll, if and only if the value is not nil."
+  {:added "0.1.0"}
   ([] (conj))
   ([coll] (conj coll))
   ([coll x]
@@ -71,6 +76,7 @@
 #?(:clj
    (defmacro fn->
      "The same as #(-> % ~@forms)"
+     {:added "0.1.0"}
      [& forms]
      `(fn [x#] (-> x# ~@forms))))
 
@@ -78,6 +84,7 @@
 #?(:clj
    (defmacro fn->>
      "The same as #(->> % ~@forms)"
+     {:added "0.1.0"}
      [& forms]
      `(fn [x#] (->> x# ~@forms))))
 
@@ -97,7 +104,7 @@
 #?(:clj
    (defmacro forv
      "Like for, but returns a vector. Not lazy."
-     {:style/indent 1}
+     {:style/indent 1, :added "0.1.0"}
      [seq-exprs body-expr]
      `(vec (for ~seq-exprs ~body-expr))))
 
@@ -109,6 +116,6 @@
    (defmacro for-map
      "Like for, but takes a key and value expression and returns a map.
   Multiple equal keys are treated as if by repeated assoc. Not lazy."
-     {:style/indent 1}
+     {:style/indent 1, :added "0.1.0"}
      [seq-exprs key-expr val-expr]
      `(into {} (for ~seq-exprs [~key-expr ~val-expr]))))
