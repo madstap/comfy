@@ -23,6 +23,9 @@ Require like this:
   [madstap.comfy.core :as comfy]))
 ```
 
+In cljs there's no need to `:require-macros`,
+as comfy self-requires to enable macro-inference.
+
 ## API docs
 
 [https://madstap.github.io/comfy/madstap.comfy.core.html](https://madstap.github.io/comfy/madstap.comfy.core.html)
