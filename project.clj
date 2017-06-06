@@ -10,7 +10,7 @@
             [lein-cljsbuild "1.1.6"]
             [lein-doo "0.1.7"]]
 
-  :codox {:output-path "codox"
+  :codox {:output-path "docs"
           :metadata {:doc/format :markdown}
           :source-uri "http://github.com/madstap/comfy/blob/{version}/{filepath}#L{line}"}
 
