@@ -1,9 +1,7 @@
 (ns madstap.comfy.core-test
   (:require
    [madstap.comfy.core :as sut]
-   #?(:clj [clojure.test :refer [deftest is are testing]]
-      ;; Is this needed?
-      :cljs [cljs.test :refer-macros [deftest is are testing]])))
+   [clojure.test :refer [deftest is are testing]]))
 
 (deftest one?-and-two?-tests
   (is (sut/one? 1))
