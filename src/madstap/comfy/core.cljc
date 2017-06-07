@@ -138,6 +138,10 @@
   [f & args]
   (fn [x] (apply f x args)))
 
+(s/fdef assoc-in-some
+  :args (s/cat :m associative? :ks sequential? :v any?)
+  :ret associative?)
+
 (defn assoc-in-some
   "Associates a value in a nested associative structure,
   if and only if the value is not nil."
