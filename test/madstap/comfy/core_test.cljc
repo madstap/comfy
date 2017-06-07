@@ -62,3 +62,7 @@
 
 (deftest flip-test
   (is (= {:foo 1} ((comfy/flip assoc :foo 1) {}))))
+
+(deftest assoc-in-some-test
+  (is (= {:foo {}} (comfy/assoc-in-some {:foo {}} [:foo :bar] nil)))
+  (is (= {:foo {:bar 42}} (comfy/assoc-in-some {} [:foo :bar] 42))))

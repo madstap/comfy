@@ -136,3 +136,10 @@
   {:added "0.1.1"}
   [f & args]
   (fn [x] (apply f x args)))
+
+(defn assoc-in-some
+  "Associates a value in a nested associative structure,
+  if and only if the value is not nil."
+  {:added "0.1.1"}
+  [m ks v]
+  (if (some? v) (assoc-in m ks v) m))
