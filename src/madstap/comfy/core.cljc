@@ -1,6 +1,7 @@
 (ns madstap.comfy.core
   "A small collection of functions and macros that (mostly) wouldn't
   be out of place in clojure.core."
+  (:refer-clojure :exclude [keep run!])
   #?(:cljs (:require-macros [madstap.comfy.core]))
   (:require
    [clojure.spec.alpha :as s]
@@ -143,3 +144,36 @@
   {:added "0.1.1"}
   [m ks v]
   (if (some? v) (assoc-in m ks v) m))
+
+(s/fdef keep
+  :args (s/cat :f ifn? :colls (s/* seqable?))
+  :ret (s/or :transducer fn?
+             :coll (s/coll-of some?))
+  :fn (fn [{:keys [args ret]}]
+        (let [[ret-type _] ret]
+          (= ret-type (if (:colls args) :coll :transducer)))))
+
+(defn keep
+  "Like core/keep, but can take an arbitrary number of colls.
+  Returns a lazy sequence of the non-nil results from the application of f
+  to the set of first items in each coll, followed by the set of second items
+  in each coll, until any of the colls is exhausted.
+  f must accept number-of-colls arguments.
+  The transducer returned from calling it with only a function,
+  can, if needed, accept multiple arguments (like map)."
+  {:added "0.1.1"}
+  ([f] (comp (map f) (remove nil?)))
+  ([f coll] (clojure.core/keep f coll))
+  ([f coll & colls]
+   (apply sequence (keep f) (cons coll colls))))
+
+(defn run!
+  "Like core/run!, but can take an arbitrary number of colls,
+  in which case proc is called with number-of-colls arguments, consisting of
+  the set of first items in each coll, followed by the set of second items,
+  until one of the colls is exchausted. Returns nil."
+  {:added "0.1.1"}
+  ([proc coll]
+   (clojure.core/run! proc coll))
+  ([proc coll & colls]
+   (dorun (apply map proc (cons coll colls)))))

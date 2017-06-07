@@ -66,3 +66,22 @@
 (deftest assoc-in-some-test
   (is (= {:foo {}} (comfy/assoc-in-some {:foo {}} [:foo :bar] nil)))
   (is (= {:foo {:bar 42}} (comfy/assoc-in-some {} [:foo :bar] 42))))
+
+(deftest keep-test
+  (is (= [:foo :bar]
+         (comfy/keep (fn [x y z]
+                       (when (= x y z) x))
+                     [1 :foo 3 :bar :quux]
+                     [2 :foo 2 :bar :quux]
+                     [5 :foo 3 :bar])))
+  (is (= [0 1] (sequence (comfy/keep (fn [x y] x)) [0 nil 1] (range 3)))))
+
+(deftest run!-test
+  (is (= [[0 0] [1 1] [2 2]]
+         (let [a (atom [])]
+           (comfy/run! (fn [x y]
+                         (swap! a conj [x y]))
+                       (range)
+                       (range 3))
+           @a)))
+  (is (nil? (comfy/run! (fn [x y] x) (range 3) (range 3)))))
