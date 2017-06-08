@@ -85,3 +85,7 @@
                        (range 3))
            @a)))
   (is (nil? (comfy/run! (fn [x y] x) (range 3) (range 3)))))
+
+(deftest group-by-test
+  (is (= {false [[0 2] [4]], true [[1 3] [5]]}
+         (comfy/group-by odd? (comp (take 3) (partition-all 2)) (range 100)))))

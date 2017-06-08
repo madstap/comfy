@@ -1,7 +1,7 @@
 (ns madstap.comfy.core
   "A small collection of functions and macros that (mostly) wouldn't
   be out of place in clojure.core."
-  (:refer-clojure :exclude [keep run!])
+  (:refer-clojure :exclude [keep run! group-by])
   #?(:cljs (:require-macros [madstap.comfy.core]))
   (:require
    [clojure.spec.alpha :as s]
@@ -89,6 +89,7 @@
      [& forms]
      `(fn [x#] (->> x# ~@forms))))
 
+
 #?(:clj
    (s/def ::seq-exprs
      (s/and vector?
@@ -97,6 +98,7 @@
                         :when  (s/cat :k #{:when}  :expr any?)
                         :while (s/cat :k #{:while} :expr any?)))
             #(contains? (set (map key %)) :binding))))
+
 
 #?(:clj
    (s/fdef forv
@@ -109,6 +111,7 @@
      [seq-exprs body-expr]
      `(vec (for ~seq-exprs ~body-expr))))
 
+
 #?(:clj
    (s/fdef for-map
      :args (s/cat :seq-exprs ::seq-exprs, :key-expr any?, :val-expr any?)))
@@ -120,6 +123,7 @@
      {:style/indent 1, :added "0.1.0"}
      [seq-exprs key-expr val-expr]
      `(into {} (for ~seq-exprs [~key-expr ~val-expr]))))
+
 
 (defn flip
   "Takes a function f and arguments args. Returns a function of
@@ -138,6 +142,7 @@
   [f & args]
   (fn [x] (apply f x args)))
 
+
 (s/fdef assoc-in-some
   :args (s/cat :m associative? :ks sequential? :v any?)
   :ret associative?)
@@ -148,6 +153,7 @@
   {:added "0.1.1"}
   [m ks v]
   (if (some? v) (assoc-in m ks v) m))
+
 
 (s/fdef keep
   :args (s/cat :f ifn? :colls (s/* seqable?))
@@ -171,6 +177,7 @@
   ([f coll & colls]
    (apply sequence (keep f) (cons coll colls))))
 
+
 (defn run!
   "Like core/run!, but can take an arbitrary number of colls,
   in which case proc is called with number-of-colls arguments, consisting of
@@ -181,3 +188,28 @@
    (clojure.core/run! proc coll))
   ([proc coll & colls]
    (dorun (apply map proc (cons coll colls)))))
+
+
+(s/fdef group-by
+  :args (s/cat :f ifn?, :xform (s/? ifn?), :coll seqable?)
+  :ret (s/map-of any? vector?))
+
+(defn group-by
+  "Like core/group-by, but takes an optional transducer. For each different key,
+  an instance of the reducing function will be created, with its own state, if any."
+  {:added "0.1.1"}
+  ([f coll] (clojure.core/group-by f coll))
+  ([f xform coll]
+   (let [[acc rfs] (reduce (fn [[acc rfs] x]
+                             (let [k (f x)
+                                   res (get acc k [])
+                                   rf-maybe (get rfs k)
+                                   existing-rf? (boolean rf-maybe)
+                                   rf (if existing-rf? rf-maybe (xform conj))
+                                   rfs (if existing-rf? rfs (assoc rfs k rf))]
+                               (if (reduced? res)
+                                 [acc rfs]
+                                 [(assoc acc k (rf res x)) rfs])))
+                           [{} {}]
+                           coll)]
+     (into {} (map (fn [[k res]] [k ((rfs k) (unreduced res))])) acc))))
