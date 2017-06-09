@@ -64,7 +64,9 @@
   :ret (s/nilable coll?))
 
 (defn conj-some
-  "Conj a value into a coll, if and only if the value is not nil."
+  "conj[oin]. Returns a new collection with the xs
+  'added' if and only if they are not nil.
+  Otherwise behaves like core/conj."
   {:added "0.1.0"}
   ([] (conj))
   ([coll] (conj coll))
@@ -164,13 +166,13 @@
           (= ret-type (if (:colls args) :coll :transducer)))))
 
 (defn keep
-  "Like core/keep, but can take an arbitrary number of colls.
-  Returns a lazy sequence of the non-nil results from the application of f
-  to the set of first items in each coll, followed by the set of second items
-  in each coll, until any of the colls is exhausted.
-  f must accept number-of-colls arguments.
-  The transducer returned from calling it with only a function,
-  can, if needed, accept multiple arguments (like map)."
+  "Returns a lazy sequence of the non-nil results of (f item). Note,
+  this means false return values will be included.  f must be free of
+  side-effects.  Returns a transducer when no collection is provided.
+
+  When given multiple collections, will behave as map. (This includes the transducer).
+
+  A drop-in replacement for core/keep."
   {:added "0.1.1"}
   ([f] (comp (map f) (remove nil?)))
   ([f coll] (clojure.core/keep f coll))
@@ -178,11 +180,19 @@
    (apply sequence (keep f) (cons coll colls))))
 
 
+(s/fdef run!
+  :args (s/cat :proc ifn? :colls (s/+ seqable?))
+  :ret nil?)
+
 (defn run!
-  "Like core/run!, but can take an arbitrary number of colls,
-  in which case proc is called with number-of-colls arguments, consisting of
-  the set of first items in each coll, followed by the set of second items,
-  until one of the colls is exchausted. Returns nil."
+  "Runs the supplied procedure (via reduce), for purposes of side
+  effects, on successive items in the collection. Returns nil.
+
+  In the case of multiple collections map is used to run the procedure
+  (which will be given number-of-colls arguments),
+  but run! is still eager and returns nil.
+
+  A drop-in replacement for core/run!."
   {:added "0.1.1"}
   ([proc coll]
    (clojure.core/run! proc coll))
@@ -195,8 +205,16 @@
   :ret (s/map-of any? vector?))
 
 (defn group-by
-  "Like core/group-by, but takes an optional transducer. For each different key,
-  an instance of the reducing function will be created, with its own state, if any."
+  "Returns a map of the elements of coll keyed by the result of
+  f on each element. The value at each key will be a vector of the
+  corresponding elements, in the order they appeared in coll.
+
+  When given a transducer, the resulting reducing function will be called on
+  the vector and each element as it's added.
+  For each different key, a new instance of the reducing function will be created,
+  with its own state, if any.
+
+  A drop-in replacement for core/group-by."
   {:added "0.1.1"}
   ([f coll] (clojure.core/group-by f coll))
   ([f xform coll]
