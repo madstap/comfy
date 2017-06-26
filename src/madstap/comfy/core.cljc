@@ -188,7 +188,7 @@
   "Runs the supplied procedure (via reduce), for purposes of side
   effects, on successive items in the collection. Returns nil.
 
-  In the case of multiple collections map is used to run the procedure
+  In the case of multiple collections, map is used to run the procedure
   (which will be given number-of-colls arguments),
   but run! is still eager and returns nil.
 
@@ -231,3 +231,16 @@
                            [{} {}]
                            coll)]
      (into {} (map (fn [[k res]] [k ((rfs k) (unreduced res))])) acc))))
+
+
+(s/fdef frequencies-by
+  :args (s/cat :f ifn? :coll seqable?)
+  :ret map?)
+
+(defn frequencies-by
+  "Returns a map of the distinct values of (f item) in coll
+  to the number of times they appear."
+  [f coll]
+  (reduce (fn [acc x]
+            (update acc (f x) (fnil inc 0)))
+          {}, coll))
