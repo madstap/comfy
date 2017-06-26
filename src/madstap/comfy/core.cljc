@@ -145,8 +145,20 @@
   (fn [x] (apply f x args)))
 
 
+;; Already in medley, but repeated here for symmetry with assoc-in-some
+(s/fdef assoc-some
+  :args (s/cat :m (s/nilable associative?) :k any? :v any?))
+
+(defn assoc-some
+  "Associates a value in an associative structure,
+  if and only if the value is not nil."
+  {:added "0.1.2"}
+  [m k v]
+  (if (some? v) (assoc m k v) m))
+
+
 (s/fdef assoc-in-some
-  :args (s/cat :m associative? :ks sequential? :v any?)
+  :args (s/cat :m (s/nilable associative?) :ks sequential? :v any?)
   :ret associative?)
 
 (defn assoc-in-some
