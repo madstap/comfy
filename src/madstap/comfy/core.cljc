@@ -218,13 +218,19 @@
   {:added "0.1.1"}
   ([f coll] (clojure.core/group-by f coll))
   ([f xform coll]
+   ;; res => result (the vector at each key)
+   ;; rfs => reducing functions
    (let [[acc rfs] (reduce (fn [[acc rfs] x]
                              (let [k (f x)
                                    res (get acc k [])
+
+                                   ;; These conditionals are for perf reasons,
+                                   ;; to not do more work than necessary.
                                    rf-maybe (get rfs k)
                                    existing-rf? (boolean rf-maybe)
                                    rf (if existing-rf? rf-maybe (xform conj))
                                    rfs (if existing-rf? rfs (assoc rfs k rf))]
+
                                (if (reduced? res)
                                  [acc rfs]
                                  [(assoc acc k (rf res x)) rfs])))
