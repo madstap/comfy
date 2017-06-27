@@ -14,7 +14,7 @@ and/or a clojurescript version >= 1.9.542
 Add this to your `:dependencies`
 
 ```clojure
-[madstap/comfy "0.1.1"]]
+[madstap/comfy "0.1.2"]
 ```
 
 Require like this:
