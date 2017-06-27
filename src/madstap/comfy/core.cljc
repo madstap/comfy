@@ -123,6 +123,23 @@
   `(into {} (for ~seq-exprs [~key-expr ~val-expr])))
 
 
+#?(:clj
+   (s/fdef forcat
+     :args (s/cat :seq-exprs ::seq-exprs, :body-expr any?)))
+
+;; The obvious (apply concat (for ,,,)) solution is not lazy,
+;; (mapcat doesn't seem to be, either).
+;; Returns a vector to make non-lazyness obvious.
+;; (Not consisted with mapcat, but you generally don't care whether something
+;;  is a sequence or a vector, you do sometimes care if it's lazy or not.)
+(defmacro forcat
+  "Like for, but presumes that the body-expr evaluates to a seqable thing,
+  and returns a vector of every element from each body. Not lazy."
+  {:style/indent 1, :added "0.1.2"}
+  [seq-exprs body-expr]
+  `(into [] cat (for ~seq-exprs ~body-expr)))
+
+
 (defn flip
   "Takes a function f and arguments args. Returns a function of
   one argument x that is f applied with x as it's first argument
