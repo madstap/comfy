@@ -272,7 +272,7 @@
 
 (s/fdef frequencies-by
   :args (s/cat :f ifn? :coll seqable?)
-  :ret map?)
+  :ret (s/map-of any? int?))
 
 (defn frequencies-by
   "Returns a map of the distinct values of (f item) in coll
