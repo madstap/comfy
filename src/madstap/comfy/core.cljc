@@ -76,22 +76,21 @@
    (reduce conj-some coll (cons x xs))))
 
 
-#?(:clj
-   (defmacro fn->
-     "The same as #(-> % ~@forms)"
-     {:added "0.1.0"}
-     [& forms]
-     `(fn [x#] (-> x# ~@forms))))
+(defmacro fn->
+  "The same as #(-> % ~@forms)"
+  {:added "0.1.0"}
+  [& forms]
+  `(fn [x#] (-> x# ~@forms)))
 
 
-#?(:clj
-   (defmacro fn->>
-     "The same as #(->> % ~@forms)"
-     {:added "0.1.0"}
-     [& forms]
-     `(fn [x#] (->> x# ~@forms))))
+(defmacro fn->>
+  "The same as #(->> % ~@forms)"
+  {:added "0.1.0"}
+  [& forms]
+  `(fn [x#] (->> x# ~@forms)))
 
-
+;; This spec, and the specs that depend on it need the conditional
+;; because :clojure.core.specs.alpha is not yet ported to cljs.
 #?(:clj
    (s/def ::seq-exprs
      (s/and vector?
@@ -106,25 +105,22 @@
    (s/fdef forv
      :args (s/cat :seq-exprs ::seq-exprs, :body any?)))
 
-#?(:clj
-   (defmacro forv
-     "Like for, but returns a vector. Not lazy."
-     {:style/indent 1, :added "0.1.0"}
-     [seq-exprs body-expr]
-     `(vec (for ~seq-exprs ~body-expr))))
-
+(defmacro forv
+  "Like for, but returns a vector. Not lazy."
+  {:style/indent 1, :added "0.1.0"}
+  [seq-exprs body-expr]
+  `(vec (for ~seq-exprs ~body-expr)))
 
 #?(:clj
    (s/fdef for-map
      :args (s/cat :seq-exprs ::seq-exprs, :key-expr any?, :val-expr any?)))
 
-#?(:clj
-   (defmacro for-map
-     "Like for, but takes a key and value expression and returns a map.
+(defmacro for-map
+  "Like for, but takes a key and value expression and returns a map.
   Multiple equal keys are treated as if by repeated assoc. Not lazy."
-     {:style/indent 1, :added "0.1.0"}
-     [seq-exprs key-expr val-expr]
-     `(into {} (for ~seq-exprs [~key-expr ~val-expr]))))
+  {:style/indent 1, :added "0.1.0"}
+  [seq-exprs key-expr val-expr]
+  `(into {} (for ~seq-exprs [~key-expr ~val-expr])))
 
 
 (defn flip
