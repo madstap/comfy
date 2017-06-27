@@ -143,19 +143,25 @@
 
 ;; Already in medley, but repeated here for symmetry with assoc-in-some
 (s/fdef assoc-some
-  :args (s/cat :m (s/nilable associative?) :k any? :v any?))
+  :args (s/cat :m (s/nilable associative?) :kvs (s/+ (s/cat :k any? :v any?)))
+  :ret (s/nilable associative?))
 
 (defn assoc-some
   "Associates a value in an associative structure,
   if and only if the value is not nil."
   {:added "0.1.2"}
-  [m k v]
-  (if (some? v) (assoc m k v) m))
+  ([m k v]
+   (if (some? v) (assoc m k v) m))
+  ([m k v & kvs]
+   (reduce (fn [acc [k v]]
+             (assoc-some acc k v))
+           (assoc-some m k v)
+           (partition 2 kvs))))
 
 
 (s/fdef assoc-in-some
   :args (s/cat :m (s/nilable associative?) :ks sequential? :v any?)
-  :ret associative?)
+  :ret (s/nilable associative?))
 
 (defn assoc-in-some
   "Associates a value in a nested associative structure,
