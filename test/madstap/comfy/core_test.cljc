@@ -95,4 +95,7 @@
   (is (= {false 5, true 4} (comfy/frequencies-by odd? (range 9)))))
 
 (deftest forcat-test
-  (is (= [0 0 1 0 1 2] (comfy/forcat [i [1 2 3]] (range i)))))
+  (is (= '(0 0 1 0 1 2) (comfy/forcat [i [1 2 3]] (range i)))))
+
+(deftest forcatv-test
+  (is (= [0 0 1 0 1 2] (comfy/forcatv [i [1 2 3]] (range i)))))

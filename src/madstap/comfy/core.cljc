@@ -123,19 +123,35 @@
   `(into {} (for ~seq-exprs [~key-expr ~val-expr])))
 
 
+(defn join-seqs
+  "Lazily concatenates a sequence-of-sequences into a flat sequence."
+  {:no-doc true}
+  [seq-of-seqs]
+  (lazy-seq
+   (when-let [s (seq seq-of-seqs)]
+     (concat (first s) (join-seqs (rest s))))))
+
+
 #?(:clj
    (s/fdef forcat
      :args (s/cat :seq-exprs ::seq-exprs, :body-expr any?)))
 
-;; The obvious (apply concat (for ,,,)) solution is not lazy,
-;; (mapcat doesn't seem to be, either).
-;; Returns a vector to make non-lazyness obvious.
-;; (Not consisted with mapcat, but you generally don't care whether something
-;;  is a sequence or a vector, you do sometimes care if it's lazy or not.)
 (defmacro forcat
   "Like for, but presumes that the body-expr evaluates to a seqable thing,
-  and returns a vector of every element from each body. Not lazy."
+  and returns a lazy sequence of every element from each body."
   {:style/indent 1, :added "0.1.2"}
+  [seq-exprs body-expr]
+  `(join-seqs (for ~seq-exprs ~body-expr)))
+
+
+#?(:clj
+   (s/fdef forcatv
+     :args (s/cat :seq-exprs ::seq-exprs, :body-expr any?)))
+
+(defmacro forcatv
+  "Like for, but presumes that the body-expr evaluates to a seqable thing,
+  and returns a vector of every element from each body. Not lazy."
+  {:style/indent 1, :added "0.2.0"}
   [seq-exprs body-expr]
   `(into [] cat (for ~seq-exprs ~body-expr)))
 
