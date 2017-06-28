@@ -4,6 +4,7 @@
   (:refer-clojure :exclude [keep run! group-by])
   #?(:cljs (:require-macros [madstap.comfy.core]))
   (:require
+   [clojure.string :as str]
    [clojure.spec.alpha :as s]
    #?(:clj [clojure.core.specs.alpha])))
 
@@ -298,3 +299,40 @@
   (reduce (fn [acc x]
             (update acc (f x) (fnil inc 0)))
           {}, coll))
+
+
+;; Apparently parseInt on rhino interprets leading zeroes as octal
+;; (chrome doesn't seem to), and that's the only reason for this function.
+(defn- strip-leading-zeroes
+  {:no-doc true}
+  [s]
+  (let [negative? (str/starts-with? s "-")
+        abs-s (if negative? (second (str/split s #"-")) s)]
+    (if (or (not (str/starts-with? abs-s "0"))
+            (one? (count abs-s)))
+      s
+      (->> abs-s (drop-while #{\0}) (apply str (when negative? \-))))))
+
+
+(s/fdef str->int
+  :args (s/cat :s string?)
+  :ret (s/nilable int?))
+
+(defn str->int
+  "Parses a string to an integer.
+  Returns nil if the string has the wrong format. Leading zeroes are ignored.
+
+  It only accepts integers, ie. less accepting than js/parseInt,
+  which accepts and truncates decimal numbers.
+
+  On the jvm it will only work in the range between Long/MIN_VALUE and
+  Long/MAX_VALUE (returns nil if out of that range).
+
+  On js it uses parseInt, and will work in whatever range that works in.
+  (Numbers in js ¯\\_(ツ)_/¯)"
+  {:addded "0.2.1"}
+  [s]
+  (when (re-find #"^-?\d+$" s)
+    #?(:clj (try (Long/parseLong s)
+                 (catch NumberFormatException _ nil))
+       :cljs (js/parseInt (strip-leading-zeroes s)))))

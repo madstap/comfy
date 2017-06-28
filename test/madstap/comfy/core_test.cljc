@@ -99,3 +99,12 @@
 
 (deftest forcatv-test
   (is (= [0 0 1 0 1 2] (comfy/forcatv [i [1 2 3]] (range i)))))
+
+(deftest str->int-test
+  (is (= 9223372036854775807 (comfy/str->int "9223372036854775807")))
+  (is (= -123 (comfy/str->int "-123")))
+  (is (= 10 (comfy/str->int "010")))
+  (is (= -10 (comfy/str->int "-010")))
+  (is (nil? (comfy/str->int "10.2")))
+  (is (nil? (comfy/str->int "a10")))
+  (is (nil? (comfy/str->int "10a"))))
