@@ -293,6 +293,7 @@
 (defn frequencies-by
   "Returns a map of the distinct values of (f item) in coll
   to the number of times they appear."
+  {:added "0.1.2"}
   [f coll]
   (reduce (fn [acc x]
             (update acc (f x) (fnil inc 0)))
