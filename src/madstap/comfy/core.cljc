@@ -313,7 +313,7 @@
   which accepts and truncates decimal numbers.
 
   On the jvm it will only work in the range between Long/MIN_VALUE and
-  Long/MAX_VALUE (returns nil if out of that range).
+  Long/MAX_VALUE (inclusive) and throws an exception if out of that range.
 
   On js it uses parseInt, and will work in whatever range that works in.
   (Numbers in js ¯\\_(ツ)_/¯)"
@@ -321,5 +321,6 @@
   [s]
   (when (re-find #"^-?\d+$" s)
     #?(:clj (try (Long/parseLong s)
-                 (catch NumberFormatException _ nil))
+                 (catch NumberFormatException _
+                   (throw (ex-info "Number out of range for a Long." {:str s}))))
        :cljs (js/parseInt s 10))))
