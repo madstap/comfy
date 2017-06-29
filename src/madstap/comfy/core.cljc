@@ -301,19 +301,6 @@
           {}, coll))
 
 
-;; Apparently parseInt on rhino interprets leading zeroes as octal
-;; (chrome doesn't seem to), and that's the only reason for this function.
-(defn- strip-leading-zeroes
-  {:no-doc true}
-  [s]
-  (let [negative? (str/starts-with? s "-")
-        abs-s (if negative? (second (str/split s #"-")) s)]
-    (if (or (not (str/starts-with? abs-s "0"))
-            (one? (count abs-s)))
-      s
-      (->> abs-s (drop-while #{\0}) (apply str (when negative? \-))))))
-
-
 (s/fdef str->int
   :args (s/cat :s string?)
   :ret (s/nilable int?))
@@ -335,4 +322,4 @@
   (when (re-find #"^-?\d+$" s)
     #?(:clj (try (Long/parseLong s)
                  (catch NumberFormatException _ nil))
-       :cljs (js/parseInt (strip-leading-zeroes s)))))
+       :cljs (js/parseInt s 10))))
