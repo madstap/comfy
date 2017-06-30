@@ -118,7 +118,8 @@
 
 (defmacro for-map
   "Like for, but takes a key and value expression and returns a map.
-  Multiple equal keys are treated as if by repeated assoc. Not lazy."
+  Multiple equal keys are treated as if by repeated assoc (last one wins).
+  Not lazy."
   {:style/indent 1, :added "0.1.0"}
   [seq-exprs key-expr val-expr]
   `(into {} (for ~seq-exprs [~key-expr ~val-expr])))
