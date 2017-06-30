@@ -302,12 +302,12 @@
 
 
 (s/fdef str->int
-  :args (s/cat :s string?)
+  :args (s/cat :s (s/nilable string?))
   :ret (s/nilable int?))
 
 (defn str->int
-  "Parses a string to an integer.
-  Returns nil if the string has the wrong format. Leading zeroes are ignored.
+  "Parses a string to an integer. Returns nil if the string has the
+  wrong format or is nil. Leading zeroes are ignored.
 
   It only accepts integers, ie. less accepting than js/parseInt,
   which accepts and truncates decimal numbers.
@@ -319,7 +319,7 @@
   (Numbers in js ¯\\_(ツ)_/¯)"
   {:addded "0.2.1"}
   [s]
-  (when (re-find #"^-?\d+$" s)
+  (when (and s (re-find #"^-?\d+$" s))
     #?(:clj (try (Long/parseLong s)
                  (catch NumberFormatException _
                    (throw (ex-info "Number out of range for a Long." {:str s}))))

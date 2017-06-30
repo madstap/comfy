@@ -1,7 +1,10 @@
 (ns madstap.comfy.core-test
   (:require
    [madstap.comfy.core :as comfy]
+   #?(:clj [clojure.spec.test.alpha :as test])
    [clojure.test :refer [deftest is are testing]]))
+
+#?(:clj (test/instrument))
 
 (deftest one?-and-two?-tests
   (is (comfy/one? 1))
@@ -107,4 +110,5 @@
   (is (= -10 (comfy/str->int "-010")))
   (is (nil? (comfy/str->int "10.2")))
   (is (nil? (comfy/str->int "a10")))
-  (is (nil? (comfy/str->int "10a"))))
+  (is (nil? (comfy/str->int "10a")))
+  (is (nil? (comfy/str->int nil))))
