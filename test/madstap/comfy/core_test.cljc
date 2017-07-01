@@ -112,3 +112,10 @@
   (is (nil? (comfy/str->int "a10")))
   (is (nil? (comfy/str->int "10a")))
   (is (nil? (comfy/str->int nil))))
+
+(deftest str->dec-test
+  (is (= 0.5 (comfy/str->dec "0.5")))
+  (is (= 0.5 (comfy/str->dec ".5")))
+  (is (= 1.0 (comfy/str->dec "1")))
+  (is (= 1.0 (comfy/str->dec "1.")))
+  (is (= 1.0 (comfy/str->dec "01."))))

@@ -321,3 +321,16 @@
   (when (and s (re-find #"^[-|+]?\d+$" s))
     #?(:clj (edn/read-string (strip-leading-zeroes s))
        :cljs (js/parseInt s 10))))
+
+(s/fdef str->dec
+  :args (s/cat :s (s/nilable string?))
+  :ret (s/nilable double?))
+
+(defn str->dec
+  "Parses a decimal number from a string. Returns nil if the string
+  has the wrong format or is nil. Leading zeroes are ignored."
+  {:added "0.2.3"}
+  [s]
+  (when (and s (re-find #"^[-|+]?(\d+)?\.?(\d+)?$" s) (not= s "."))
+    #?(:clj (Double/parseDouble s)
+       :cljs (js/parseFloat s))))
