@@ -6,6 +6,7 @@
   (:require
    [clojure.string :as str]
    [clojure.spec.alpha :as s]
+   #?(:clj [clojure.edn :as edn])
    #?(:clj [clojure.core.specs.alpha])))
 
 (def ^:private nilable-map? (some-fn map? nil?))
@@ -302,26 +303,21 @@
           {}, coll))
 
 
+(defn strip-leading-zeroes
+  {:no-doc true}
+  [s]
+  (let [negative? (str/starts-with? s "-")]
+    (str (when negative? \-) (last (re-find #"(0+)?(\d+)" s)))))
+
 (s/fdef str->int
   :args (s/cat :s (s/nilable string?))
   :ret (s/nilable int?))
 
 (defn str->int
   "Parses a string to an integer. Returns nil if the string has the
-  wrong format or is nil. Leading zeroes are ignored.
-
-  It only accepts integers, ie. less accepting than js/parseInt,
-  which accepts and truncates decimal numbers.
-
-  On the jvm it will only work in the range between Long/MIN_VALUE and
-  Long/MAX_VALUE (inclusive) and throws an exception if out of that range.
-
-  On js it uses parseInt, and will work in whatever range that works in.
-  (Numbers in js ¯\\_(ツ)_/¯)"
+  wrong format or is nil. Leading zeroes are ignored."
   {:addded "0.2.1"}
   [s]
-  (when (and s (re-find #"^-?\d+$" s))
-    #?(:clj (try (Long/parseLong s)
-                 (catch NumberFormatException _
-                   (throw (ex-info "Number out of range for a Long." {:str s}))))
+  (when (and s (re-find #"^[-|+]?\d+$" s))
+    #?(:clj (edn/read-string (strip-leading-zeroes s))
        :cljs (js/parseInt s 10))))
