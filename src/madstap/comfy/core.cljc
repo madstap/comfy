@@ -345,3 +345,46 @@
   [& args]
   `(-> ~(last args) ~@(butlast args)))
 
+#?(:clj
+   (s/fdef syms-in-binding
+     :args (s/cat :b :clojure.core.specs.alpha/binding-form)
+     :ret (s/coll-of simple-symbol? :kind set?)))
+
+(defn syms-in-binding
+  "Returns a set of all symbols in a binding form."
+  {:no-doc true}
+  [b]
+  (let [simple-symbol (comp symbol name)]
+    (if (symbol? b)
+      [b]
+      (walk/pre-reduce (fn [acc x]
+                         (cond (symbol? x)
+                               (conj acc (simple-symbol x))
+
+                               ;;; Special-case:
+                               ;;   Keywords act like symbols in {:keys [:foo]}
+                               (and (map-entry? x)
+                                    (= :keys (first x)))
+                               (into acc
+                                     (comp (filter keyword?) (map simple-symbol))
+                                     (second x))
+
+                               :else acc))
+                       #{}, b))))
+
+
+#?(:clj
+   (s/fdef defs
+     :args (s/cat :binding :clojure.core.specs.alpha/binding-form, :body any?)))
+
+(defmacro defs
+  "defs(tructure)
+   Like def, but can take a binding form instead of a symbol to
+   destructure the results of the body.
+   Doesn't support docstrings or other metadata."
+  {:added "0.2.3"}
+  [binding body]
+  `(let [~binding ~body]
+     ~@(for [sym (syms-in-binding binding)]
+         `(def ~sym ~sym))))
+
