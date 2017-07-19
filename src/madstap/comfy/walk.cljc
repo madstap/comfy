@@ -1,4 +1,5 @@
 (ns madstap.comfy.walk
+  "Reduce and transduce versions of clojure.walk/prewalk and postwalk."
   (:require
    [clojure.spec.alpha :as s]))
 
@@ -10,6 +11,7 @@
   Performs a depth-first, pre-order traversal of form calling rf on
   init and each sub-form.
   Will use (rf) as init walue it not supplied one. (Like transduce, unlike reduce.)"
+  {:added "0.2.3"}
   ([rf form]
    (pre-reduce rf (rf) form))
   ([rf init form]
@@ -26,6 +28,7 @@
 (defn pre-transduce
   "Prewalk transduce.
   Traverses form in depth-first, pre-order, behaving otherwise like transduce."
+  {:added "0.2.3"}
   ([xform rf form]
    (pre-transduce xform rf (rf) form))
   ([xform rf init form]
@@ -42,6 +45,7 @@
   Performs a depth-first, pre-order traversal of form calling rf on
   init and each sub-form.
   Will use (rf) as init walue it not supplied one. (Like transduce, unlike reduce.)"
+  {:added "0.2.3"}
   ([rf form]
    (post-reduce rf (rf) form))
   ([rf init form]
@@ -58,6 +62,7 @@
 (defn post-transduce
   "Postwalk transduce.
   Traverses form in depth-first, post-order, behaving otherwise like transduce."
+  {:added "0.2.3"}
   ([xform rf form]
    (post-transduce xform rf (rf) form))
   ([xform rf init form]
