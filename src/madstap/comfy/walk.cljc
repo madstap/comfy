@@ -21,7 +21,7 @@
 
 
 (s/fdef pre-transduce
-  :args (s/cat :xform (s/fspec :ret ifn?), :rf ifn?, :init any?, :form any?))
+  :args (s/cat :xform ifn?, :rf ifn?, :init any?, :form any?))
 
 (defn pre-transduce
   "Prewalk transduce.
@@ -53,7 +53,7 @@
 
 
 (s/fdef post-transduce
-  :args (s/cat :xform (s/fspec :ret ifn?), :rf ifn?, :init any?, :form any?))
+  :args (s/cat :xform ifn?, :rf ifn?, :init any?, :form any?))
 
 (defn post-transduce
   "Postwalk transduce.
