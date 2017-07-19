@@ -334,3 +334,14 @@
   (when (and s (re-find #"^[-|+]?(\d+)?\.?(\d+)?$" s) (not= s "."))
     #?(:clj (Double/parseDouble s)
        :cljs (js/parseFloat s))))
+(defmacro <<->
+  "Turns a thread-last macro into a thread first one.
+
+  (->> (range 3)
+       (mapv inc)
+       (<<->
+        (conj :foo))) ;=> [1 2 3 :foo]"
+  {:added "0.2.3"}
+  [& args]
+  `(-> ~(last args) ~@(butlast args)))
+
