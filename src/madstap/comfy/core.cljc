@@ -352,8 +352,10 @@
      :ret (s/coll-of simple-symbol? :kind set?)))
 
 (defn syms-in-binding
-  "Returns a set of all symbols in a binding form."
-  {:no-doc true}
+  "Returns the set of symbols (and keywords that act as symbols)
+  in a binding form."
+  {:no-doc true
+   :added "0.2.3"}
   [b]
   (let [simple-symbol (comp symbol name)]
     (if (symbol? b)
