@@ -2,7 +2,7 @@
   "A small collection of functions and macros that (mostly) wouldn't
   be out of place in clojure.core."
   (:refer-clojure :exclude [keep run! group-by])
-  #?(:cljs (:require-macros [madstap.comfy.core]))
+  #?(:cljs (:require-macros [madstap.comfy.core :refer [forv]]))
   (:require
    [clojure.string :as str]
    [madstap.comfy.walk :as walk]
@@ -461,6 +461,5 @@
   {:added "0.2.3"}
   [binding body]
   `(let [~binding ~body]
-     ~@(for [sym (syms-in-binding binding)]
-         `(def ~sym ~sym))))
-
+     ~(forv [sym (syms-in-binding binding)]
+        `(def ~sym ~sym))))

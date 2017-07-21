@@ -122,3 +122,13 @@
   (is (= 1.0 (comfy/str->dec "1")))
   (is (= 1.0 (comfy/str->dec "1.")))
   (is (= 1.0 (comfy/str->dec "01."))))
+
+(deftest defs-test
+  (is (= [1 2] (do (comfy/defs [foo1 bar1] [1 2])
+                   [foo1 bar1])))
+  (is (= 3 (do (comfy/defs {:keys [:foo2]} {:foo2 3})
+               foo2)))
+  (is (vector? (comfy/defs [foo3 bar3 baz3] [4 5 6])))
+  (is (= [7 8] (do (comfy/defs {:keys [:x/foo4 x/bar4]} #:x{:foo4 7 :bar4 8})
+                   [foo4 bar4]))))
+
