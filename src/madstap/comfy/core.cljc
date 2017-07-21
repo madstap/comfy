@@ -212,9 +212,8 @@
   :args (s/cat :f ifn? :colls (s/* seqable?))
   :ret (s/or :transducer fn?
              :coll (s/coll-of some?))
-  :fn (fn [{:keys [args ret]}]
-        (let [[ret-type _] ret]
-          (= ret-type (if (:colls args) :coll :transducer)))))
+  :fn (fn [{{:keys [colls]} :args, [ret-type _] :ret}]
+        (= ret-type (if colls :coll :transducer))))
 
 (defn keep
   "Returns a lazy sequence of the non-nil results of (f item). Note,
@@ -310,6 +309,7 @@
   (let [negative? (str/starts-with? s "-")]
     (str (when negative? \-) (last (re-find #"(0+)?(\d+)" s)))))
 
+
 (s/fdef str->int
   :args (s/cat :s (s/nilable string?))
   :ret (s/nilable int?))
@@ -323,6 +323,7 @@
     #?(:clj (edn/read-string (strip-leading-zeroes s))
        :cljs (js/parseInt s 10))))
 
+
 (s/fdef str->dec
   :args (s/cat :s (s/nilable string?))
   :ret (s/nilable double?))
@@ -335,6 +336,8 @@
   (when (and s (re-find #"^[-|+]?(\d+)?\.?(\d+)?$" s) (not= s "."))
     #?(:clj (Double/parseDouble s)
        :cljs (js/parseFloat s))))
+
+
 (defmacro <<->
   "Turns a thread-last macro into a thread first one.
 
@@ -345,6 +348,75 @@
   {:added "0.2.3"}
   [& args]
   `(-> ~(last args) ~@(butlast args)))
+
+
+(s/fdef prewalk-reduce
+  :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
+
+(defn prewalk-reduce
+  "Prewalk reduce.
+  Performs a depth-first, pre-order traversal of form, calling rf on
+  init and each sub-form.
+  Will use (rf) as init value if not supplied one. (Like transduce, unlike reduce.)"
+  {:added "0.3.0"}
+  ([rf form]
+   (prewalk-reduce rf (rf) form))
+  ([rf init form]
+   (letfn [(step [acc x]
+             (if (seqable? x)
+               (reduce step (rf acc x) x)
+               (rf acc x)))]
+     (step init form))))
+
+
+(s/fdef postwalk-reduce
+  :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
+
+(defn postwalk-reduce
+  "Prewalk reduce.
+  Performs a depth-first, pre-order traversal of form calling rf on
+  init and each sub-form.
+  Will use (rf) as init walue it not supplied one. (Like transduce, unlike reduce.)"
+  {:added "0.3.0"}
+  ([rf form]
+   (postwalk-reduce rf (rf) form))
+  ([rf init form]
+   (letfn [(step [acc x]
+             (if (seqable? x)
+               (rf (reduce step acc x) x)
+               (rf acc x)))]
+     (step init form))))
+
+
+(s/fdef prewalk-transduce
+  :args (s/cat :xform ifn?, :rf ifn?, :init any?, :form any?))
+
+(defn prewalk-transduce
+  "Prewalk transduce.
+  Traverses form in depth-first, pre-order, behaving otherwise like transduce."
+  {:added "0.3.0"}
+  ([xform rf form]
+   (prewalk-transduce xform rf (rf) form))
+  ([xform rf init form]
+   (let [f (xform rf)
+         res (prewalk-reduce f init form)]
+     (f res))))
+
+
+(s/fdef postwalk-transduce
+  :args (s/cat :xform ifn?, :rf ifn?, :init any?, :form any?))
+
+(defn postwalk-transduce
+  "Postwalk transduce.
+  Traverses form in depth-first, post-order, behaving otherwise like transduce."
+  {:added "0.3.0"}
+  ([xform rf form]
+   (postwalk-transduce xform rf (rf) form))
+  ([xform rf init form]
+   (let [f (xform rf)
+         res (postwalk-reduce f init form)]
+     (f res))))
+
 
 #?(:clj
    (s/fdef syms-in-binding
@@ -360,20 +432,20 @@
   (let [simple-symbol (comp symbol name)]
     (if (symbol? b)
       [b]
-      (walk/pre-reduce (fn [acc x]
-                         (cond (symbol? x)
-                               (conj acc (simple-symbol x))
+      (prewalk-reduce (fn [acc x]
+                        (cond (symbol? x)
+                              (conj acc (simple-symbol x))
 
-                               ;;; Special-case:
-                               ;;   Keywords act like symbols in {:keys [:foo]}
-                               (and #?(:clj (map-entry? x)
-                                       :cljs (some-fn vector? #(two? (count %))))
-                                    (= :keys (first x)))
-                               (into acc
-                                     (comp (filter keyword?) (map simple-symbol))
-                                     (second x))
+                              ;;; Special-case:
+                              ;;   Keywords act like symbols in {:keys [:foo]}
+                              (and #?(:clj (map-entry? x)
+                                      :cljs (some-fn vector? #(two? (count %))))
+                                   (= :keys (first x)))
+                              (into acc
+                                    (comp (filter keyword?) (map simple-symbol))
+                                    (second x))
 
-                               :else acc))
+                              :else acc))
                        #{}, b))))
 
 

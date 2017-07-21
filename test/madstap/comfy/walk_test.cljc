@@ -1,8 +1,8 @@
 (ns madstap.comfy.walk-test
-  (:require [madstap.comfy.walk :refer [pre-reduce pre-transduce
-                                        post-reduce post-transduce]]
-            [clojure.test :refer [deftest testing is are run-all-tests]]
-            [clojure.walk :as core.walk]))
+  (:require
+   [madstap.comfy.core :as comfy]
+   [clojure.test :refer [deftest testing is are run-all-tests]]
+   [clojure.walk :as core.walk]))
 
 ;; Alternative implementation using clojure.walk
 
@@ -38,9 +38,9 @@
 (def pre-transduce* (walk-transduce-factory* core.walk/prewalk))
 
 (deftest example-based-comparison-to-core-walk
-  (are [form] (= (post-reduce conj [] form)
+  (are [form] (= (comfy/postwalk-reduce conj [] form)
                  (post-reduce* conj [] form)
-                 (post-transduce identity conj [] form)
+                 (comfy/postwalk-transduce identity conj [] form)
                  (post-transduce* identity conj [] form))
     [1 2 3]
     1
