@@ -30,7 +30,8 @@
   (is (= '(1 2 3) ((comfy/fn->> (map inc)) (range 3)))))
 
 (deftest forv-test
-  (is (= [1 2 3] (comfy/forv [i (range 3)] (inc i)))))
+  (is ((some-fn vector? #(= % [1 2 3]))
+       (comfy/forv [i (range 3)] (inc i)))))
 
 (deftest for-map-test
   (is (= {0 "0" 1 "1"}
@@ -98,10 +99,12 @@
   (is (= {false 5, true 4} (comfy/frequencies-by odd? (range 9)))))
 
 (deftest forcat-test
-  (is (= '(0 0 1 0 1 2) (comfy/forcat [i [1 2 3]] (range i)))))
+  (is ((some-fn seq? #(= % '(0 0 1 0 1 2)))
+       (comfy/forcat [i [1 2 3]] (range i)))))
 
 (deftest forcatv-test
-  (is (= [0 0 1 0 1 2] (comfy/forcatv [i [1 2 3]] (range i)))))
+  (is ((some-fn vector? #(= % [0 0 1 0 1 2]))
+       (comfy/forcatv [i [1 2 3]] (range i)))))
 
 (deftest str->int-test
   (is (= 9223372036854775807 (comfy/str->int "9223372036854775807")))
