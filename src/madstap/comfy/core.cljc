@@ -92,6 +92,7 @@
   [& forms]
   `(fn [x#] (->> x# ~@forms)))
 
+
 ;; This spec, and the specs that depend on it need the conditional
 ;; because :clojure.core.specs.alpha is not yet ported to cljs.
 #?(:clj
@@ -113,6 +114,7 @@
   {:style/indent 1, :added "0.1.0"}
   [seq-exprs body-expr]
   `(vec (for ~seq-exprs ~body-expr)))
+
 
 #?(:clj
    (s/fdef for-map
@@ -159,6 +161,10 @@
   [seq-exprs body-expr]
   `(into [] cat (for ~seq-exprs ~body-expr)))
 
+
+(s/fdef flip
+  :args (s/cat :f ifn? :args (s/* any?))
+  :ret ifn?)
 
 (defn flip
   "Takes a function f and arguments args. Returns a function of
@@ -284,8 +290,8 @@
                                (if (reduced? res)
                                  [acc rfs]
                                  [(assoc acc k (rf res x)) rfs])))
-                           [{} {}]
-                           coll)]
+                           [{} {}], coll)]
+
      (into {} (map (fn [[k res]] [k ((rfs k) (unreduced res))])) acc))))
 
 
@@ -308,7 +314,6 @@
   [s]
   (let [negative? (str/starts-with? s "-")]
     (str (when negative? \-) (last (re-find #"(0+)?(\d+)" s)))))
-
 
 (s/fdef str->int
   :args (s/cat :s (s/nilable string?))
@@ -346,9 +351,12 @@
        (<<->
         (conj :foo))) ;=> [1 2 3 :foo]"
   {:added "0.2.3"}
-  [& args]
-  `(-> ~(last args) ~@(butlast args)))
+  [& forms]
+  `(-> ~(last forms) ~@(butlast forms)))
 
+
+;;;; Walk-reduce
+;; Reduce and transduce versions of the functions in clojure.walk
 
 (s/fdef prewalk-reduce
   :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
@@ -358,7 +366,7 @@
   Performs a depth-first, pre-order traversal of form, calling rf on
   init and each sub-form.
   Will use (rf) as init value if not supplied one. (Like transduce, unlike reduce.)"
-  {:added "0.3.0"}
+  {:added "1.0.0"}
   ([rf form]
    (prewalk-reduce rf (rf) form))
   ([rf init form]
@@ -377,7 +385,7 @@
   Performs a depth-first, pre-order traversal of form calling rf on
   init and each sub-form.
   Will use (rf) as init walue it not supplied one. (Like transduce, unlike reduce.)"
-  {:added "0.3.0"}
+  {:added "1.0.0"}
   ([rf form]
    (postwalk-reduce rf (rf) form))
   ([rf init form]
