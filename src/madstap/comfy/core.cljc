@@ -396,7 +396,7 @@
 
 
 (s/fdef prewalk-transduce
-  :args (s/cat :xform ifn?, :rf ifn?, :init any?, :form any?))
+  :args (s/cat :xform ifn?, :rf ifn?, :init (s/? any?), :form any?))
 
 (defn prewalk-transduce
   "Prewalk transduce.
@@ -411,7 +411,7 @@
 
 
 (s/fdef postwalk-transduce
-  :args (s/cat :xform ifn?, :rf ifn?, :init any?, :form any?))
+  :args (s/cat :xform ifn?, :rf ifn?, :init (s/? any?), :form any?))
 
 (defn postwalk-transduce
   "Postwalk transduce.
