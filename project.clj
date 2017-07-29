@@ -4,7 +4,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojure "1.9.0-alpha17"]]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
+                 [org.clojure/clojurescript "1.9.671" :scope "provided"]]
 
   :plugins [[lein-codox "0.10.3"]
             [lein-cljsbuild "1.1.6"]
@@ -16,6 +17,7 @@
 
   :cljsbuild
   {:builds
+
    {:test
     {:source-paths ["src" "test"]
      :compiler {:output-to "target/main.js"
@@ -31,6 +33,8 @@
    "test-all"  ["do" ["test-clj"] ["test-cljs"]]}
 
   :profiles
-  {:provided {:dependencies [[org.clojure/clojurescript "1.9.562"]]}
+  {:dev {:dependencies [[com.cemerick/piggieback "0.2.2"]
+                        [org.clojure/tools.nrepl "0.2.10"]]
+         :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
    :test {:dependencies [[org.mozilla/rhino "1.7.7"]]}
    :1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha17"]]}})
