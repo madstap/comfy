@@ -401,8 +401,8 @@
 
 (defn prewalk-transduce
   "Prewalk transduce.
-  Traverses form in depth-first, pre-order, behaving otherwise like transduce."
-  {:added "0.3.0"}
+  Traverses form depth-first, pre-order, behaving otherwise like transduce."
+  {:added "1.0.0"}
   ([xform rf form]
    (prewalk-transduce xform rf (rf) form))
   ([xform rf init form]
@@ -416,8 +416,8 @@
 
 (defn postwalk-transduce
   "Postwalk transduce.
-  Traverses form in depth-first, post-order, behaving otherwise like transduce."
-  {:added "0.3.0"}
+  Traverses form depth-first, post-order, behaving otherwise like transduce."
+  {:added "1.0.0"}
   ([xform rf form]
    (postwalk-transduce xform rf (rf) form))
   ([xform rf init form]
@@ -454,12 +454,13 @@
                                     (second x))
 
                               :else acc))
-                       #{}, b))))
+                      [], b))))
 
 
 #?(:clj
    (s/fdef defs
-     :args (s/cat :binding :clojure.core.specs.alpha/binding-form, :body any?)))
+     :args (s/cat :binding :clojure.core.specs.alpha/binding-form, :body any?)
+     :ret vector?))
 
 (defmacro defs
   "defs(tructure)
