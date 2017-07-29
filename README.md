@@ -2,9 +2,16 @@
 
 Some comfortable clojure(script) utils.
 
-Similar to [medley](https://github.com/weavejester/medley)
-in that it tries to be fairly lightweight and focused,
-with a small set of general-purpose functions and macros.
+Fairly lightweight, consists of general-purpose functions and macros that work with the basic abstractions of clojure (data-structures, sequences, transducers). Has no dependencies.
+
+Inspired by [medley](https://github.com/weavejester/medley).
+
+
+## Roadmap
+
+### Alpha, subject to breaking changes!
+
+Will stay alpha at least until clojure 1.9.0 is released, at which time 1.0.0 will be released with a promise not to break anything.
 
 ## Usage
 
@@ -14,7 +21,7 @@ and/or a clojurescript version >= 1.9.542
 Add this to your `:dependencies`
 
 ```clojure
-[madstap/comfy "0.2.2"]
+[madstap/comfy "1.0.0-alpha2"]
 ```
 
 Require like this:
@@ -27,11 +34,13 @@ Require like this:
 
 In cljs there's no need to `:require-macros`, as comfy enables macro-inference.
 
-### [api docs](https://madstap.github.io/comfy/madstap.comfy.core.html)
+## Things it has
 
-Some of the more interesting things in comfy are:
+##### `prewalk-reduce`, `prewalk-transduce`, `postwalk-reduce` and `postwalk-transduce`
 
-#### `deep-merge` and `deep-merge-with`
+Exactly what it says on the tin; reduce and transduce versions of the functions in `clojure.walk`.
+
+##### `deep-merge` and `deep-merge-with`
 
 Pretty self explanatory, they appear in a lot of places and now here as well.
 
@@ -41,7 +50,7 @@ One thing I've done differently to some other implementations is that a nested
 A use-case I've found is to merge attr maps in hiccup,
 where there might be a `:style` key that has a nested map.
 
-#### `group-by`
+##### `group-by` as a transducing context
 
 Sometimes when I use `group-by`, I also want to transform the values
 as they're added to the vector at each key. Accepting a transducer
@@ -60,12 +69,25 @@ with it's own state, if any.
      (comfy/group-by key (map val))) ;;=> {:int [1 2 3], :str ["foo" "bar"]}
 ```
 
-#### `keep` and `run!`
+##### `keep` and `run!` with multiple collections arity
 
 I found the fact that the core versions can only take one collection quite surprising,
 so I made versions without that limitation. When passed multiple collections,
 they behave like map.
 
+##### `forcat`, `forv`, `for-map` and other variations on `for`
+
+`forcat` is to `for` like `mapcat` is to `map`. Similarly `forv` => `mapv`.
+
+`for-map` creates a map, and takes a key and a value expression as the body.
+
+##### `defs`
+
+It's `def`, but with destructuring. Quite handy at the repl, sometimes useful in actual code.
+
+##### But wait, there's more!
+
+Check out the [api docs](https://madstap.github.io/comfy/madstap.comfy.core.html).
 
 ## License
 
