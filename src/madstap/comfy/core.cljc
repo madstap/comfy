@@ -5,7 +5,6 @@
   #?(:cljs (:require-macros [madstap.comfy.core :refer [forv]]))
   (:require
    [clojure.string :as str]
-   [madstap.comfy.walk :as walk]
    [clojure.spec.alpha :as s]
    #?(:clj [clojure.edn :as edn])
    #?(:clj [clojure.core.specs.alpha])))
