@@ -428,7 +428,7 @@
 #?(:clj
    (s/fdef syms-in-binding
      :args (s/cat :b :clojure.core.specs.alpha/binding-form)
-     :ret (s/coll-of simple-symbol? :kind set?)))
+     :ret (s/coll-of simple-symbol?)))
 
 (defn syms-in-binding
   "Returns the set of symbols (and keywords that act as symbols)
