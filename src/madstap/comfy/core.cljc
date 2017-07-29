@@ -447,7 +447,7 @@
                               ;;; Special-case:
                               ;;   Keywords act like symbols in {:keys [:foo]}
                               (and #?(:clj (map-entry? x)
-                                      :cljs (some-fn vector? #(two? (count %))))
+                                      :cljs (every-pred vector? #(two? (count %))))
                                    (= :keys (first x)))
                               (into acc
                                     (comp (filter keyword?) (map simple-symbol))
