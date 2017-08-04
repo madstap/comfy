@@ -9,13 +9,10 @@
 (defn walk-reduce-factory*
   {:no-doc true}
   [walker]
-  (fn walk-reduce
-    ([rf coll]
-     (walk-reduce rf (rf) coll))
-    ([rf init coll]
-     (let [*acc (atom [])]
-       (walker (fn [x] (swap! *acc conj x) x) coll)
-       (reduce rf init @*acc)))))
+  (fn walk-reduce [rf init coll]
+    (let [*acc (atom [])]
+      (walker (fn [x] (swap! *acc conj x) x) coll)
+      (reduce rf init @*acc))))
 
 (defn walk-transduce-factory*
   {:no-doc true}
@@ -49,9 +46,36 @@
     [1 [2 3 [4] 5 [6]] 7 [8 [[9 10] 11]]]
     [:foo :bar {'(1 [2 3] 4) :bar}]))
 
+(deftest walkers-respect-reduced-test
+  (is (= :foo
+         (prewalk-reduce #(reduced %2) nil :foo)
+         (postwalk-reduce #(reduced %2) nil :foo)))
+  (is (= [1 2 3] (prewalk-reduce #(reduced %2) nil [1 2 3])))
+  (is (= 1 (postwalk-reduce #(reduced %2) nil [1 2 3])))
+
+  (testing "reduced is passed upwards from nested collections"
+    (is (= [1 [1]]
+           (postwalk-reduce (fn [acc x]
+                              (if (coll? x)
+                                (reduced (conj acc x))
+                                (conj acc x)))
+                            []
+                            [[[1]] 2 3])))
+
+    (is (= [[[[1]]] [[1]] [1]]
+           (prewalk-reduce (fn [acc x]
+                             ;; The call to first here will throw if the
+                             ;; reduction fails to respect reduced. 
+                             (if (not (coll? (first x)))
+                               (reduced (conj acc x))
+                               (conj acc x)))
+                           []
+                           [[[1]]])))))
+
+
 (comment
 
-  (run-all-tests #"walk")
+  (run-all-tests #"walk"))
 
 
-  )
+  

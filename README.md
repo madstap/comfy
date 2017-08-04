@@ -6,6 +6,7 @@ Fairly lightweight, consists of general-purpose functions and macros that work w
 
 Inspired by [medley](https://github.com/weavejester/medley).
 
+Functions with `:no-doc` metadata are considered implementation details that are subject to change.
 
 ## Roadmap
 
@@ -83,7 +84,7 @@ they behave like map.
 
 ##### `defs`
 
-It's `def`, but with destructuring. Quite handy at the repl, sometimes useful in actual code.
+It's `def`, but with destructuring. Quite handy at the repl, may be useful in actual code.
 
 ##### But wait, there's more!
 

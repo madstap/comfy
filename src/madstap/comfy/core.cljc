@@ -357,42 +357,65 @@
 ;;;; Walk-reduce
 ;; Reduce and transduce versions of the functions in clojure.walk
 
+;; The reduce versions require the caller to supply an init value for multiple reasons.
+;; * Using the first value from form would complicate the code significantly,
+;;   be different between pre and post, and is not really very useful as the types are heterogenous.
+;; * Using (rf) is not very useful as in most cases you would write an inline anon fn.
+;; * I can always add this later if I feel like it,
+;;   but I couldn't remove it or change it without breaking code.
+;;   (The "kick the can down the road" methodology of software development.)
+
+;; Can probably be optimized some, the current version is the simplest thing that works.
+(defn reduce*
+  "Version of reduce that, if reduced, returns the value still wrapped in reduced.
+  Needed to pass a reduced value upwards through nested collections
+  in pre- and postwalk reduce/transduce."
+  {:no-doc true}
+  [rf init coll]
+  (if (empty? coll)
+    init
+    (let [acc (rf init (first coll))]
+      (if (reduced? acc)
+        acc
+        (recur rf acc (rest coll))))))
+
+
 (s/fdef prewalk-reduce
-  :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
+  :args (s/cat :rf ifn?, :init any?, :form any?))
 
 (defn prewalk-reduce
   "Prewalk reduce.
   Performs a depth-first, pre-order traversal of form, calling rf on
-  init and each sub-form.
-  Will use (rf) as init value if not supplied one. (Like transduce, unlike reduce.)"
+  init and each sub-form. Unlike reduce, an init value is required."
   {:added "1.0.0"}
-  ([rf form]
-   (prewalk-reduce rf (rf) form))
-  ([rf init form]
-   (letfn [(step [acc x]
-             (if (seqable? x)
-               (reduce step (rf acc x) x)
-               (rf acc x)))]
-     (step init form))))
+  [rf init form]
+  (letfn [(step [acc x]
+            (if (seqable? x)
+              (let [acc' (rf acc x)]
+                (if (reduced? acc')
+                  acc'
+                  (reduce* step acc' x)))
+              (rf acc x)))]
+    (unreduced (step init form))))
 
 
 (s/fdef postwalk-reduce
-  :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
+  :args (s/cat :rf ifn?, :init any?, :form any?))
 
 (defn postwalk-reduce
-  "Prewalk reduce.
-  Performs a depth-first, pre-order traversal of form calling rf on
-  init and each sub-form.
-  Will use (rf) as init walue it not supplied one. (Like transduce, unlike reduce.)"
+  "Postwalk reduce.
+  Performs a depth-first, post-order traversal of form calling rf on
+  init and each sub-form. Unlike reduce, an init value is required."
   {:added "1.0.0"}
-  ([rf form]
-   (postwalk-reduce rf (rf) form))
-  ([rf init form]
-   (letfn [(step [acc x]
-             (if (seqable? x)
-               (rf (reduce step acc x) x)
-               (rf acc x)))]
-     (step init form))))
+  [rf init form]
+  (letfn [(step [acc x]
+            (if (seqable? x)
+              (let [acc' (reduce* step acc x)]
+                (if (reduced? acc')
+                  acc'
+                  (rf acc' x)))
+              (rf acc x)))]
+     (unreduced (step init form))))
 
 
 (s/fdef prewalk-transduce
@@ -444,7 +467,7 @@
                               (conj acc (simple-symbol x))
 
                               ;;; Special-case:
-                              ;;   Keywords act like symbols in {:keys [:foo]}
+                              ;;   Keywords act like symbols in {:keys [:foo :bar/baz]}
                               (and #?(:clj (map-entry? x)
                                       :cljs (and (vector? x) (two? (count x))))
                                    (= :keys (first x)))
@@ -471,3 +494,4 @@
   `(let [~binding ~body]
      ~(forv [sym (syms-in-binding binding)]
         `(def ~sym ~sym))))
+
