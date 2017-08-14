@@ -298,7 +298,7 @@
 
 (s/fdef frequencies-by
   :args (s/cat :f ifn? :coll seqable?)
-  :ret (s/map-of any? int?))
+  :ret (s/map-of any? pos-int?))
 
 (defn frequencies-by
   "Returns a map of the distinct values of (f item) in coll
@@ -466,7 +466,7 @@
                       (cond (symbol? x)
                             (conj acc (simple-symbol x))
 
-                              ;;; Special-case:
+                            ;;; Special-case:
                             ;;   Keywords act like symbols in {:keys [:foo :bar/baz]}
                             (and #?(:clj (map-entry? x)
                                     :cljs (and (vector? x) (two? (count x))))
