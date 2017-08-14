@@ -1,6 +1,6 @@
 (ns madstap.comfy.core-test
   (:require
-   [madstap.comfy.core :as comfy]
+   [madstap.comfy :as comfy]
    #?(:clj [clojure.spec.test.alpha :as test])
    [clojure.test :refer [deftest is are testing]]))
 
@@ -131,4 +131,3 @@
   (is (vector? (comfy/defs [foo3 bar3 baz3] [4 5 6])))
   (is (= [7 8] (do (comfy/defs {:keys [:x/foo4 x/bar4]} #:x{:foo4 7 :bar4 8})
                    [foo4 bar4]))))
-

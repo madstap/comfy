@@ -1,8 +1,8 @@
-(ns madstap.comfy.core
+(ns madstap.comfy
   "A small collection of functions and macros that (mostly) wouldn't
   be out of place in clojure.core."
   (:refer-clojure :exclude [keep run! group-by])
-  #?(:cljs (:require-macros [madstap.comfy.core :refer [forv]]))
+  #?(:cljs (:require-macros [madstap.comfy :refer [forv]]))
   (:require
    [clojure.string :as str]
    [clojure.spec.alpha :as s]

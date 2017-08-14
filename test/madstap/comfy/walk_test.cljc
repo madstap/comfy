@@ -1,6 +1,6 @@
 (ns madstap.comfy.walk-test
   (:require
-   [madstap.comfy.core :as comfy]
+   [madstap.comfy :as comfy]
    [clojure.test :refer [deftest testing is are run-all-tests]]
    [clojure.walk :as core.walk]))
 

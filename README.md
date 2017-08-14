@@ -30,10 +30,10 @@ Require like this:
 ```
 (ns foo.core
  (:require
-  [madstap.comfy.core :as comfy]))
+  [madstap.comfy :as comfy]))
 ```
 
-In cljs there's no need to `:require-macros`, as comfy enables macro-inference.
+In cljs there's no need for `:require-macros`.
 
 ## Things it has
 
