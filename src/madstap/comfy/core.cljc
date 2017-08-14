@@ -493,3 +493,24 @@
      ~(forv [sym (syms-in-binding binding)]
         `(def ~sym ~sym))))
 
+
+(s/fdef append
+  :args (s/cat :coll seqable? :xs (s/* any?))
+  :ret seq?)
+
+(defn append
+  "Returns a lazy seq of the elements of coll followed by xs."
+  {:added "1.0.0"}
+  [coll & xs]
+  (concat coll xs))
+
+
+(s/fdef append-some
+  :args (s/cat :coll seqable? :xs (s/* any?))
+  :ret seq?)
+
+(defn append-some
+  "Returns a lazy seq of the elements of coll followed by the non-nil xs."
+  {:added "1.0.0"}
+  [coll & xs]
+  (concat coll (remove nil? xs)))
