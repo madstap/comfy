@@ -460,23 +460,21 @@
    :added "0.2.3"}
   [b]
   (let [simple-symbol (comp symbol name)]
-    (if (symbol? b)
-      [b]
-      (prewalk-reduce (fn [acc x]
-                        (cond (symbol? x)
-                              (conj acc (simple-symbol x))
+    (prewalk-reduce (fn [acc x]
+                      (cond (symbol? x)
+                            (conj acc (simple-symbol x))
 
                               ;;; Special-case:
-                              ;;   Keywords act like symbols in {:keys [:foo :bar/baz]}
-                              (and #?(:clj (map-entry? x)
-                                      :cljs (and (vector? x) (two? (count x))))
-                                   (= :keys (first x)))
-                              (into acc
-                                    (comp (filter keyword?) (map simple-symbol))
-                                    (second x))
+                            ;;   Keywords act like symbols in {:keys [:foo :bar/baz]}
+                            (and #?(:clj (map-entry? x)
+                                    :cljs (and (vector? x) (two? (count x))))
+                                 (= :keys (first x)))
+                            (into acc
+                                  (comp (filter keyword?) (map simple-symbol))
+                                  (second x))
 
-                              :else acc))
-                      [], b))))
+                            :else acc))
+                    [], b)))
 
 
 #?(:clj
