@@ -22,7 +22,7 @@ and/or a clojurescript version >= 1.9.542
 Add this to your `:dependencies`
 
 ```clojure
-[madstap/comfy "1.0.0-alpha2"]
+[madstap/comfy "1.0.0-alpha3"]
 ```
 
 Require like this:
