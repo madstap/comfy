@@ -240,12 +240,14 @@
   :ret nil?)
 
 (defn run!
-  "Runs the supplied procedure (via reduce), for purposes of side
-  effects, on successive items in the collection. Returns nil.
+  "Runs the supplied procedure, for purposes of side
+  effects, on successive items in the collection.
 
-  In the case of multiple collections, map is used to run the procedure
-  (which will be given number-of-colls arguments),
-  but run! is still eager and returns nil.
+  Returns nil. Not lazy.
+
+  When given multiple collections,
+  proc will be called with number-of-colls arguments.
+  Will go on for the length of the shortest collection.
 
   A drop-in replacement for core/run!."
   {:added "0.1.1"}
@@ -487,7 +489,8 @@
    Like def, but can take a binding form instead of a symbol to
    destructure the results of the body.
    Doesn't support docstrings or other metadata."
-  {:added "0.2.3"}
+  {:added "0.2.3"
+   :style/indent 1}
   [binding body]
   `(let [~binding ~body]
      ~(forv [sym (syms-in-binding binding)]
