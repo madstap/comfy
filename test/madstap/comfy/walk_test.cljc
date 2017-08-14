@@ -48,34 +48,34 @@
 
 (deftest walkers-respect-reduced-test
   (is (= :foo
-         (prewalk-reduce #(reduced %2) nil :foo)
-         (postwalk-reduce #(reduced %2) nil :foo)))
-  (is (= [1 2 3] (prewalk-reduce #(reduced %2) nil [1 2 3])))
-  (is (= 1 (postwalk-reduce #(reduced %2) nil [1 2 3])))
+         (comfy/prewalk-reduce #(reduced %2) nil :foo)
+         (comfy/postwalk-reduce #(reduced %2) nil :foo)))
+  (is (= [1 2 3] (comfy/prewalk-reduce #(reduced %2) nil [1 2 3])))
+  (is (= 1 (comfy/postwalk-reduce #(reduced %2) nil [1 2 3])))
 
   (testing "reduced is passed upwards from nested collections"
     (is (= [1 [1]]
-           (postwalk-reduce (fn [acc x]
-                              (if (coll? x)
-                                (reduced (conj acc x))
-                                (conj acc x)))
-                            []
-                            [[[1]] 2 3])))
+           (comfy/postwalk-reduce (fn [acc x]
+                                    (if (coll? x)
+                                      (reduced (conj acc x))
+                                      (conj acc x)))
+                                  []
+                                  [[[1]] 2 3])))
 
     (is (= [[[[1]]] [[1]] [1]]
-           (prewalk-reduce (fn [acc x]
-                             ;; The call to first here will throw if the
-                             ;; reduction fails to respect reduced. 
-                             (if (not (coll? (first x)))
-                               (reduced (conj acc x))
-                               (conj acc x)))
-                           []
-                           [[[1]]])))))
+           (comfy/prewalk-reduce
+            (fn [acc x]
+              ;; The call to first here will throw if the
+              ;; reduction fails to respect reduced.
+              (if (not (coll? (first x)))
+                (reduced (conj acc x))
+                (conj acc x)))
+            []
+            [[[1]]])))))
 
 
 (comment
 
-  (run-all-tests #"walk"))
+  (run-all-tests #"walk")
 
-
-  
+  )
