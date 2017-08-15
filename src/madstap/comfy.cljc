@@ -392,7 +392,7 @@
   {:added "1.0.0"}
   [rf init form]
   (letfn [(step [acc x]
-            (if (seqable? x)
+            (if (coll? x)
               (let [acc' (rf acc x)]
                 (if (reduced? acc')
                   acc'
@@ -411,7 +411,7 @@
   {:added "1.0.0"}
   [rf init form]
   (letfn [(step [acc x]
-            (if (seqable? x)
+            (if (coll? x)
               (let [acc' (reduce* step acc x)]
                 (if (reduced? acc')
                   acc'
