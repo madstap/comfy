@@ -456,8 +456,7 @@
      :ret (s/coll-of simple-symbol?)))
 
 (defn syms-in-binding
-  "Returns the set of symbols (and keywords that act as symbols)
-  in a binding form."
+  "Returns the symbols (and keywords that act as symbols) in a binding form."
   {:no-doc true
    :added "0.2.3"}
   [b]
