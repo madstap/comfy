@@ -258,8 +258,13 @@
 
 
 (s/fdef group-by
-  :args (s/cat :f ifn?, :xform (s/? ifn?), :coll seqable?)
-  :ret (s/map-of any? vector?))
+  :args (s/cat :f ifn?
+               :xform (s/? ifn?)
+               :rf (s/alt :rf (s/cat :rf ifn?
+                                     :init (s/? any?))
+                          :no-rf (s/cat))
+               :coll seqable?)
+  :ret map?)
 
 (defn group-by
   "Returns a map of the elements of coll keyed by the result of
@@ -275,22 +280,28 @@
   {:added "0.1.1"}
   ([f coll] (clojure.core/group-by f coll))
   ([f xform coll]
-   ;; res => result (the vector at each key)
+   (group-by f xform conj coll))
+  ([f xform rf coll]
+   (group-by f xform rf (rf) coll))
+  ([f xform rf init coll]
+   ;; rf => the untransduced reducing function
+   ;; rf* => the transduced rf (for each key)
+   ;; res => result (for each key)
    ;; rfs => reducing functions
    (let [[acc rfs] (reduce (fn [[acc rfs] x]
                              (let [k (f x)
-                                   res (get acc k [])
+                                   res (get acc k init)
 
                                    ;; These conditionals are for perf reasons,
                                    ;; to not do more work than necessary.
                                    rf-maybe (get rfs k)
                                    existing-rf? (boolean rf-maybe)
-                                   rf (if existing-rf? rf-maybe (xform conj))
-                                   rfs (if existing-rf? rfs (assoc rfs k rf))]
+                                   rf* (if existing-rf? rf-maybe (xform rf))
+                                   rfs (if existing-rf? rfs (assoc rfs k rf*))]
 
                                (if (reduced? res)
                                  [acc rfs]
-                                 [(assoc acc k (rf res x)) rfs])))
+                                 [(assoc acc k (rf* res x)) rfs])))
                            [{} {}], coll)]
 
      (into {} (map (fn [[k res]] [k ((rfs k) (unreduced res))])) acc))))

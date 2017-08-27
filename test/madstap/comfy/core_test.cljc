@@ -92,7 +92,11 @@
 
 (deftest group-by-test
   (is (= {false [[0 2] [4]], true [[1 3] [5]]}
-         (comfy/group-by odd? (comp (take 3) (partition-all 2)) (range 100)))))
+         (comfy/group-by odd? (comp (take 3) (partition-all 2)) (range 100))))
+  (is (= {false 20 true 25}
+         (comfy/group-by odd? identity + (range 10))))
+  (is (= {false #{0 2 4} true #{1 3 5}}
+         (comfy/group-by odd? (take 3) conj #{} (range 100)))))
 
 (deftest frequencies-by-test
   (is (= {} (comfy/frequencies-by throw-fn [])))
