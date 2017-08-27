@@ -276,6 +276,8 @@
   For each different key, a new instance of the reducing function will be created,
   with its own state, if any.
 
+  Eagerly evaluates all of coll, even if all results are reduced.
+
   A drop-in replacement for core/group-by."
   {:added "0.1.1"}
   ([f coll] (clojure.core/group-by f coll))
