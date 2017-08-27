@@ -531,3 +531,45 @@
   {:added "1.0.0"}
   [coll & xs]
   (concat coll (remove nil? xs)))
+
+
+(s/fdef take-while-distinct-by
+  :args (s/cat :f ifn? :coll (s/? seqable?))
+  :ret (s/or :transducer ifn?, :coll seq?))
+
+(defn take-while-distinct-by
+  "Takes items until the f of an item repeats (not inclusive)."
+  {:added "1.0.0"}
+  ([f]
+   (fn [rf]
+     (let [seen (volatile! #{})]
+       (fn
+         ([] (rf))
+         ([res] (rf res))
+         ([res x]
+          (let [y (f x)]
+            (if (contains? @seen y)
+              (ensure-reduced res)
+              (do (vswap! seen conj y)
+                  (rf res x)))))))))
+  ([f coll]
+   (let [seen (volatile! #{})]
+     (letfn [(step [coll]
+               (lazy-seq
+                (when-let [[x & xs] (seq coll)]
+                  (let [y (f x)]
+                    (when-not (contains? @seen y)
+                      (vswap! seen conj y)
+                      (cons x (step xs)))))))]
+       (step coll)))))
+
+
+(s/fdef take-while-distinct
+  :args (s/cat :coll (s/? seqable?))
+  :ret (s/or :transducer ifn?, :coll (s/and seq? (partial apply distinct?))))
+
+(def ^{:arglists '([] [coll])
+       :added "1.0.0"
+       :doc "Take items until an item repeats (not inclusive)."}
+  take-while-distinct (partial take-while-distinct-by identity))
+

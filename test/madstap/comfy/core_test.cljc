@@ -135,3 +135,12 @@
   (is (vector? (comfy/defs [foo3 bar3 baz3] [4 5 6])))
   (is (= [7 8] (do (comfy/defs {:keys [:x/foo4 x/bar4]} #:x{:foo4 7 :bar4 8})
                    [foo4 bar4]))))
+
+(deftest take-while-distinct-tests
+  (testing "distinct"
+    (= (vec (range 10))
+       (transduce (comfy/take-while-distinct) conj (cycle (range 10))))
+    (= (range 10) (comfy/take-while-distinct (cycle (range 10)))))
+  (testing "distinct-by"
+    (= [0 1] (transduce (comfy/take-while-distinct-by odd?) conj (range)))
+    (= '(0 1) (comfy/take-while-distinct-by odd? (range)))))
