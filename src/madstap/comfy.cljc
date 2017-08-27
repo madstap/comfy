@@ -303,8 +303,10 @@
                                  [acc rfs]
                                  [(assoc acc k (rf* res x)) rfs])))
                            [{} {}], coll)]
-
-     (into {} (map (fn [[k res]] [k ((rfs k) (unreduced res))])) acc))))
+     (into {}
+           (map (fn [[k res]]
+                  [k ((rfs k) (unreduced res))]))
+           acc))))
 
 
 (s/fdef frequencies-by
