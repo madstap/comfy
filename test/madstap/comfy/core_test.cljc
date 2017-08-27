@@ -144,3 +144,7 @@
   (testing "distinct-by"
     (= [0 1] (transduce (comfy/take-while-distinct-by odd?) conj (range)))
     (= '(0 1) (comfy/take-while-distinct-by odd? (range)))))
+
+(deftest map-all-test
+  (is (= '([0 0] [1 nil] [2 nil])
+         (comfy/map-all vector (range 3) (range 1)))))

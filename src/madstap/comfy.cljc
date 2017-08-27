@@ -573,3 +573,20 @@
        :doc "Take items until an item repeats (not inclusive)."}
   take-while-distinct (partial take-while-distinct-by identity))
 
+
+(s/fdef map-all
+  :args (s/cat :f ifn?, :colls (s/+ seqable?))
+  :ret seq?)
+
+(defn map-all
+  "ike map, but keeps going until the end of the longest collection,
+  substituting nil when a collection is exhausted."
+  {:added "1.0.0"
+   :arglists '([f coll & colls])}
+  [f & colls]
+  (->> (map #(concat % (repeat ::none)) colls)
+       (apply map (fn [& args]
+                    (if (every? #{::none} args)
+                      ::stop
+                      (apply f (replace {::none nil} args)))))
+       (take-while (complement #{::stop}))))
