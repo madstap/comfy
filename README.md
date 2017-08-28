@@ -2,27 +2,25 @@
 
 Some comfortable clojure(script) utils.
 
-Fairly lightweight, consists of general-purpose functions and macros that work with the basic abstractions of clojure (data-structures, sequences, transducers). Has no dependencies.
+General-purpose functions and macros that work with the basic
+abstractions of clojure(data-structures, sequences, transducers).
+Has no dependencies.
 
-Inspired by [medley](https://github.com/weavejester/medley).
+I tend to add this lib and [medley](https://github.com/weavejester/medley)
+to any new project as they always seem to come in handy.
 
-Functions with `:no-doc` metadata are considered implementation details that are subject to change.
-
-## Roadmap
-
-### Alpha, subject to breaking changes!
-
-Will stay alpha at least until clojure 1.9.0 is released, at which time 1.0.0 will be released with a promise not to break anything.
+Functions with `:no-doc` metadata are considered implementation
+details.
 
 ## Usage
 
-comfy leverages spec, and requires a clojure version >= 1.9.0-alpha16
+Requires a clojure version >= 1.9.0-alpha16
 and/or a clojurescript version >= 1.9.542
 
 Add this to your `:dependencies`
 
 ```clojure
-[madstap/comfy "1.0.0-alpha4"]
+[madstap/comfy "1.0.0"]
 ```
 
 Require like this:
