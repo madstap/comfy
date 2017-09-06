@@ -134,7 +134,7 @@ It's `def`, but with destructuring. Quite handy at the repl, may be useful in ac
 
 ##### But wait, there's more!
 
-Check out the [api docs](https://madstap.github.io/comfy/madstap.comfy.core.html).
+Check out the [api docs](https://madstap.github.io/comfy/madstap.comfy.html).
 
 ## License
 
