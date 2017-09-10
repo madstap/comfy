@@ -29,15 +29,6 @@
   (is (= :foo ((comfy/fn->>) :foo)))
   (is (= '(1 2 3) ((comfy/fn->> (map inc)) (range 3)))))
 
-(deftest forv-test
-  (is ((some-fn vector? #(= % [1 2 3]))
-       (comfy/forv [i (range 3)] (inc i)))))
-
-(deftest for-map-test
-  (is (= {0 "0" 1 "1"}
-         (comfy/for-map [i (range 2)]
-           i (str i)))))
-
 (deftest deep-merge-test
   (is (nil? (comfy/deep-merge nil nil)))
   (is (= {}
@@ -102,13 +93,38 @@
   (is (= {} (comfy/frequencies-by throw-fn [])))
   (is (= {false 5, true 4} (comfy/frequencies-by odd? (range 9)))))
 
-(deftest forcat-test
-  (is ((some-fn seq? #(= % '(0 0 1 0 1 2)))
-       (comfy/forcat [i [1 2 3]] (range i)))))
+;; deprecated
+(deftest forv-test
+  (is ((every-pred vector? #(= % [1 2 3]))
+       (comfy/forv [i (range 3)] (inc i)))))
 
+;; deprecated
+(deftest for-map-test
+  (is (= {0 "0" 1 "1"}
+         (comfy/for-map [i (range 2)]
+           i (str i)))))
+
+;; deprecated
 (deftest forcatv-test
-  (is ((some-fn vector? #(= % [0 0 1 0 1 2]))
+  (is ((every-pred vector? #(= % [0 0 1 0 1 2]))
        (comfy/forcatv [i [1 2 3]] (range i)))))
+
+(deftest for-test
+  (is ((every-pred vector? #(= % [1 2 3]))
+       (comfy/for [i (range 3), :into []] (inc i))))
+  (is (= {0 "0", 1 "1"}
+         (comfy/for [i (range 2), :into {}]
+           [i (str i)]))))
+
+(deftest forcat-test
+  (is ((every-pred seq? #(= % '(0 0 1 0 1 2)))
+       (comfy/forcat [i [1 2 3]] (range i))))
+  (is (= #{0 1 2}
+         (comfy/forcat [i [1 2 3] :into #{}]
+           (range i))))
+  (is ((every-pred vector? #(= % [0 0 1 0 1 2]))
+       (comfy/forcat [i [1 2 3], :into []]
+         (range i)))))
 
 (deftest str->int-test
   (is (= 9223372036854775807 (comfy/str->int "9223372036854775807")))

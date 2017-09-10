@@ -122,11 +122,26 @@ I found the fact that the core versions can only take one collection quite surpr
 so I made versions without that limitation. When passed multiple collections,
 they behave like map.
 
-##### `forcat`, `forv`, `for-map` and other variations on `for`
+##### `for` and `forcat` with `:into` modifier
 
-`forcat` is to `for` like `mapcat` is to `map`. Similarly `forv` => `mapv`.
+`forcat` is to `for` as `mapcat` is to `map`
 
-`for-map` creates a map, and takes a key and a value expression as the body.
+They can both take `:into` as a modifier, which will _eagerly_ conj the elements
+onto the specified collection.
+
+```clojure
+(comfy/for [x (range 3), :into []]
+  (inc x))
+;;=> [1 2 3]
+
+(comfy/for [x (range 3), :into {}]
+  [(str x) x])
+;;=> {"0" 0, "1" 1, "2" 2}
+
+(comfy/forcat [x (range 4), :into []]
+  (range x))
+;;=> [0 0 1 0 1 2]
+```
 
 ##### `defs`
 
