@@ -56,7 +56,7 @@ Add this to your `:dependencies`
 
 Require like this:
 
-```
+```clojure
 (ns foo.core
  (:require
   [madstap.comfy :as comfy]))
@@ -64,14 +64,24 @@ Require like this:
 
 In cljs `:require-macros` is not needed.
 
+There are a number functions and macros that are modified versions of the
+`clojure.core` ones of the same name. They only add capabilities to the
+originals while maintaining compatibility, so it's safe to do the following.
+
+```clojure
+(ns foo.core
+ (:refer-clojure :exclude [for group-by keep run!])
+ (:require
+  [madstap.comfy :refer [for group-by keep run!]))
+```
+
+(At least as of the 1.9.0 alphas. I can imagine future changes to `clojure.core`
+breaking this assumption, but consider it unlikely.)
+
 Functions with `:no-doc` metadata are considered implementation
 details, and subject to change, as is anything in the
-`madstap.comfy.alpha` namespace. The alpha namespace in particular is a
-free-for-all where nothing is guaranteed to stay the same or even stay at all.
-
-If you find yourself using anything from
+`madstap.comfy.alpha` namespace. If you find yourself using anything from
 either, open an issue and I'll consider making it permanent.
-(Or you could just copy and paste the implementation.)
 
 ## Things it has
 
@@ -112,7 +122,7 @@ It can also take a reducing function and a(n) (optional) init value, in which ca
 it acts like `transduce`.
 
 ```clojure
-(group-by odd? (map char) str (range 97 (inc 122)))
+(comfy/group-by odd? (map char) str (range 97 (inc 122)))
 ;;=> {true "acegikmoqsuwy", false "bdfhjlnprtvxz"}
 ```
 
