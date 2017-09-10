@@ -1,8 +1,8 @@
 (ns madstap.comfy
   "A small collection of functions and macros that (mostly) wouldn't
   be out of place in clojure.core."
-  (:refer-clojure :exclude [keep run! group-by])
-  #?(:cljs (:require-macros [madstap.comfy :refer [forv]]))
+  (:refer-clojure :exclude [keep run! group-by for])
+  #?(:cljs (:require-macros [madstap.comfy :refer [for]]))
   (:require
    [clojure.string :as str]
    [clojure.spec.alpha :as s]
@@ -92,6 +92,28 @@
   `(fn [x#] (->> x# ~@forms)))
 
 
+(s/fdef keep
+  :args (s/cat :f ifn? :colls (s/* seqable?))
+  :ret (s/or :transducer fn?
+             :coll (s/coll-of some?))
+  :fn (fn [{{:keys [colls]} :args, [ret-type _] :ret}]
+        (= ret-type (if colls :coll :transducer))))
+
+(defn keep
+  "Returns a lazy sequence of the non-nil results of (f item). Note,
+  this means false return values will be included.  f must be free of
+  side-effects.  Returns a transducer when no collection is provided.
+
+  When given multiple collections, will behave as map. (This includes the transducer).
+
+  A drop-in replacement for core/keep."
+  {:added "0.1.1"}
+  ([f] (comp (map f) (remove nil?)))
+  ([f coll] (clojure.core/keep f coll))
+  ([f coll & colls]
+   (apply sequence (keep f) (cons coll colls))))
+
+
 ;; This spec, and the specs that depend on it need the conditional
 ;; because :clojure.core.specs.alpha is not yet ported to cljs.
 #?(:clj
@@ -100,33 +122,23 @@
             (s/* (s/alt :binding :clojure.core.specs.alpha/binding
                         :let   (s/cat :k #{:let}   :bindings :clojure.core.specs.alpha/bindings)
                         :when  (s/cat :k #{:when}  :expr any?)
-                        :while (s/cat :k #{:while} :expr any?)))
-            #(contains? (set (map key %)) :binding))))
+                        :while (s/cat :k #{:while} :expr any?)
+                        :into  (s/cat :k #{:into}  :coll any?)))
+            #(contains? (set (map key %)) :binding)
+            #(>= 1 (count (keep (comp #{:into} key) %))))))
 
+(defn- into-coll
+  {:no-doc true}
+  [seq-exprs]
+  (->> seq-exprs (partition 2) (filter #(= :into (first %))) first second))
 
-#?(:clj
-   (s/fdef forv
-     :args (s/cat :seq-exprs ::seq-exprs, :body any?)))
+(defn- remove-into-coll
+  {:no-doc true}
+  [seq-exprs]
+  (->> seq-exprs (partition 2) (remove #(= :into (first %))) (apply concat) vec))
 
-(defmacro forv
-  "Like for, but returns a vector. Not lazy."
-  {:style/indent 1, :added "0.1.0"}
-  [seq-exprs body-expr]
-  `(vec (for ~seq-exprs ~body-expr)))
-
-
-#?(:clj
-   (s/fdef for-map
-     :args (s/cat :seq-exprs ::seq-exprs, :key-expr any?, :val-expr any?)))
-
-(defmacro for-map
-  "Like for, but takes a key and value expression and returns a map.
-  Multiple equal keys are treated as if by repeated assoc (last one wins).
-  Not lazy."
-  {:style/indent 1, :added "0.1.0"}
-  [seq-exprs key-expr val-expr]
-  `(into {} (for ~seq-exprs [~key-expr ~val-expr])))
-
+(def ^{:no-doc true, :private true}
+  parse-seq-exprs (juxt into-coll remove-into-coll))
 
 (defn join-seqs
   "Lazily concatenates a sequence-of-sequences into a flat sequence."
@@ -138,25 +150,79 @@
 
 
 #?(:clj
+   (s/fdef for
+     :args (s/cat :seq-exprs ::seq-exprs, :expr any?)))
+
+(defmacro for
+  "Like core/for, but adds :into as a supported modifier.
+
+  :into specifies a collection which each element from the sequence
+  will be added to using conj. It makes for eager instead of lazy
+  and can only be specified once.
+
+  A drop-in replacement for core/for."
+  {:style/indent 1, :added "1.0.1"}
+  [seq-exprs expr]
+  (let [[coll seq-ex] (parse-seq-exprs seq-exprs)]
+    (if coll
+      `(into ~coll (clojure.core/for ~seq-ex ~expr))
+      `(clojure.core/for ~seq-ex ~expr))))
+
+
+#?(:clj
    (s/fdef forcat
-     :args (s/cat :seq-exprs ::seq-exprs, :body-expr any?)))
+     :args (s/cat :seq-exprs ::seq-exprs, :expr any?)))
 
 (defmacro forcat
-  "Like for, but presumes that the body-expr evaluates to a seqable thing,
-  and returns a lazy sequence of every element from each body."
-  {:style/indent 1, :added "0.1.2"}
-  [seq-exprs body-expr]
-  `(join-seqs (for ~seq-exprs ~body-expr)))
+  "A for variant that presumes the body evaluates to a seqable thing.
+  Returns a lazy sequence of all elements in each body.
 
+  Like comfy/for, accepts the :into modifier. (Which will make it non-lazy.)"
+  {:style/indent 1, :added "0.1.2"}
+  [seq-exprs expr]
+  (let [[coll seq-ex] (parse-seq-exprs seq-exprs)]
+    (if coll
+      `(into ~coll cat (clojure.core/for ~seq-ex ~expr))
+      `(join-seqs (clojure.core/for ~seq-ex ~expr)))))
+
+
+#?(:clj
+   (s/fdef forv
+     :args (s/cat :seq-exprs ::seq-exprs, :body any?)))
+
+(defmacro forv
+  "DEPRECATED: Use (comfy/for [,,, :into []] ,,,) instead.
+
+  Like for, but returns a vector. Not lazy."
+  {:style/indent 1, :added "0.1.0", :deprecated "1.0.1"}
+  [seq-exprs body-expr]
+  `(vec (for ~seq-exprs ~body-expr)))
+
+
+#?(:clj
+   (s/fdef for-map
+     :args (s/cat :seq-exprs ::seq-exprs, :key-expr any?, :val-expr any?)))
+
+(defmacro for-map
+  "DEPRECATED: Use (comfy/for [,,, :into {}] [k-expr v-expr]) instead.
+
+  Like for, but takes a key and value expression and returns a map.
+  Multiple equal keys are treated as if by repeated assoc (last one wins).
+  Not lazy."
+  {:style/indent 1, :added "0.1.0", :deprecated "1.0.1"}
+  [seq-exprs key-expr val-expr]
+  `(into {} (for ~seq-exprs [~key-expr ~val-expr])))
 
 #?(:clj
    (s/fdef forcatv
      :args (s/cat :seq-exprs ::seq-exprs, :body-expr any?)))
 
 (defmacro forcatv
-  "Like for, but presumes that the body-expr evaluates to a seqable thing,
+  "DEPRECATED: Use (comfy/forcat [,,, :into []] ,,,) instead.
+
+  Like for, but presumes that the body-expr evaluates to a seqable thing,
   and returns a vector of every element from each body. Not lazy."
-  {:style/indent 1, :added "0.2.0"}
+  {:style/indent 1, :added "0.2.0", :deprecated "1.0.1"}
   [seq-exprs body-expr]
   `(into [] cat (for ~seq-exprs ~body-expr)))
 
@@ -211,28 +277,6 @@
   {:added "0.1.1"}
   [m ks v]
   (if (some? v) (assoc-in m ks v) m))
-
-
-(s/fdef keep
-  :args (s/cat :f ifn? :colls (s/* seqable?))
-  :ret (s/or :transducer fn?
-             :coll (s/coll-of some?))
-  :fn (fn [{{:keys [colls]} :args, [ret-type _] :ret}]
-        (= ret-type (if colls :coll :transducer))))
-
-(defn keep
-  "Returns a lazy sequence of the non-nil results of (f item). Note,
-  this means false return values will be included.  f must be free of
-  side-effects.  Returns a transducer when no collection is provided.
-
-  When given multiple collections, will behave as map. (This includes the transducer).
-
-  A drop-in replacement for core/keep."
-  {:added "0.1.1"}
-  ([f] (comp (map f) (remove nil?)))
-  ([f coll] (clojure.core/keep f coll))
-  ([f coll & colls]
-   (apply sequence (keep f) (cons coll colls))))
 
 
 (s/fdef run!
@@ -507,7 +551,7 @@
    :style/indent 1}
   [binding body]
   `(let [~binding ~body]
-     ~(forv [sym (syms-in-binding binding)]
+     ~(for [sym (syms-in-binding binding), :into []]
         `(def ~sym ~sym))))
 
 
