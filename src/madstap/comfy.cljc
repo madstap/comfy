@@ -124,7 +124,7 @@
                         :when  (s/cat :k #{:when}  :expr any?)
                         :while (s/cat :k #{:while} :expr any?)
                         :into  (s/cat :k #{:into}  :coll any?)))
-            #(contains? (set (map key %)) :binding)
+            #(= :binding (ffirst %))
             #(>= 1 (count (keep (comp #{:into} key) %))))))
 
 (defn- into-coll
