@@ -157,7 +157,7 @@ onto the specified collection.
 
 It's `def`, but with destructuring. Quite handy at the repl, may be useful in actual code.
 
-#### `str->int` and `str->dec`
+##### `str->int` and `str->dec`
 
 Easy and portable parsing of integers and decimals. Returns `nil` when given a
 string with the wrong format.
