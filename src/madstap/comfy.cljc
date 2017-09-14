@@ -519,7 +519,8 @@
   {:no-doc true
    :added "0.2.3"}
   [b]
-  (let [simple-symbol (comp symbol name)]
+  (letfn [(simple-symbol [sym]
+            (with-meta (symbol (name sym)) (meta sym)))]
     (prewalk-reduce (fn [acc x]
                       (cond (symbol? x)
                             (conj acc (simple-symbol x))
@@ -544,9 +545,10 @@
 
 (defmacro defs
   "defs(tructure)
-   Like def, but can take a binding form instead of a symbol to
-   destructure the results of the body.
-   Doesn't support docstrings or other metadata."
+  Like def, but can take a binding form instead of a symbol to
+  destructure the results of the body, creating vars instead of locals.
+  Returns a vector of the vars defined.
+  Any metadata added to a symbol becomes metadata on the var."
   {:added "0.2.3"
    :style/indent 1}
   [binding body]
