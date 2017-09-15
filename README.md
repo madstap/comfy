@@ -155,7 +155,16 @@ onto the specified collection.
 
 ##### `defs`
 
-It's `def`, but with destructuring. Quite handy at the repl, may be useful in actual code.
+It's `def`, but with destructuring.
+
+```clojure
+(defs {ring-ajax-post                        :ajax-post-fn
+       ring-ajax-get-or-ws-handshake         :ajax-get-or-ws-handshake-fn
+       receive                               :ch-recv ; ChannelSocket's receive channel
+       ^{:arglists '([user-id event])} send! :send-fn ; ChannelSocket's send API fn
+       connected-uids                        :connected-uids} ; Watchable, read-only atom
+  (sente/make-channel-socket! sente-web-server-adapter {}))
+```
 
 ##### `str->int` and `str->dec`
 
