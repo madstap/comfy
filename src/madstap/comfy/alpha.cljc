@@ -40,3 +40,21 @@
   (do (instrument) (clojure.test/run-tests))
 
   )
+
+;; Couldn't get this to work in clojurescript
+;; Instead of .hasRoot cljs uses exists?, but it all becomes confusing
+;; because of the fact that cljs macros execute in clj.
+;; Maybe macrovich would help with this?
+;; Also, what about bootstrapped cljs?
+#?(:clj
+   (defmacro defsonce
+     "defs(tructure) once
+     Works like defs iff any one of the vars does not yet have a root value.
+     If all of them has a root value, body is unevaluated."
+     {:added ""
+      :style/indent 1}
+     [binding body]
+     `(let [vs# ~(comfy/forv [sym (comfy/syms-in-binding binding)]
+                   `(def ~sym))]
+        (when-not (every? #(.hasRoot %) vs#)
+          (comfy/defs ~binding ~body)))))
