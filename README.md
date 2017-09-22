@@ -4,8 +4,6 @@ Some comfortable clojure(script) utils with no dependencies.
 
 Part general-purpose functions and macros, part syntax sugar.
 
-It reflects my personal preferences, hopefully fairly tastefully chosen.
-
 Starting at version one-point-oh, I won't change the meaning of stuff,
 preferring to introduce [new names and deprecating (but not deleting) old ones](https://www.youtube.com/watch?v=oyLBGkS5ICk).
 Accretion, not breakage.
@@ -24,13 +22,13 @@ Here's an incomplete list of them:
 * [useful](https://github.com/flatland/useful)
 * [tupelo](https://github.com/cloojure/tupelo)
 
-So why another one? Well, a lot of it is convenience. This one is mine,
+So why another one? Well, mostly convenience. This one is mine,
 I can add whatever I need to it and cut releases whenever I feel like it.
 
 I can choose not to break anything, unlike detritus which says in it's readme
 "breaking changes will be frequent". Which is totally fine as long as it's
-honest about it (as it is), but I want something
-that I can just mindlessly upgrade without thinking.
+honest about it, but I want something that I can just mindlessly
+upgrade without thinking.
 
 Also, importantly, no deps. Of the above libraries, I think only medley
 and detritus have no dependencies.
@@ -85,11 +83,11 @@ either, open an issue and I'll consider making it permanent.
 
 ## Things it has
 
-##### `prewalk-reduce`, `prewalk-transduce`, `postwalk-reduce` and `postwalk-transduce`
+#### `prewalk-reduce`, `prewalk-transduce`, `postwalk-reduce` and `postwalk-transduce`
 
 Exactly what it says on the tin; reduce and transduce versions of the functions in `clojure.walk`.
 
-##### `deep-merge` and `deep-merge-with`
+#### `deep-merge` and `deep-merge-with`
 
 Pretty self explanatory, they appear in a lot of places and now here as well.
 
@@ -99,7 +97,7 @@ One thing I've done differently to some other implementations is that a nested
 A use-case I've found is to merge attr maps in hiccup,
 where there might be a `:style` key that has a nested map.
 
-##### `group-by` as a transducing context
+#### `group-by` as a transducing context
 
 Sometimes when I use `group-by`, I also want to transform the values
 as they're added to the vector at each key. Accepting a transducer
@@ -118,7 +116,7 @@ with it's own state, if any.
      (comfy/group-by key (map val))) ;;=> {:int [1 2 3], :str ["foo" "bar"]}
 ```
 
-It can also take a reducing function and a(n) (optional) init value, in which case
+It can also take a reducing function and an (optional) init value, in which case
 it acts like `transduce`.
 
 ```clojure
@@ -126,13 +124,13 @@ it acts like `transduce`.
 ;;=> {true "acegikmoqsuwy", false "bdfhjlnprtvxz"}
 ```
 
-##### `keep` and `run!` with multiple collections arity
+#### `keep` and `run!` with multiple collections arity
 
 I found the fact that the core versions can only take one collection quite surprising,
 so I made versions without that limitation. When passed multiple collections,
 they behave like map.
 
-##### `for` and `forcat` with `:into` modifier
+#### `for` and `forcat` with `:into` modifier
 
 `forcat` is to `for` as `mapcat` is to `map`
 
@@ -153,25 +151,49 @@ onto the specified collection.
 ;;=> [0 0 1 0 1 2]
 ```
 
-##### `defs`
+#### `defs`
 
 It's `def`, but with destructuring.
 
 ```clojure
-(defs {ring-ajax-post                        :ajax-post-fn
-       ring-ajax-get-or-ws-handshake         :ajax-get-or-ws-handshake-fn
-       receive                               :ch-recv ; ChannelSocket's receive channel
-       ^{:arglists '([user-id event])} send! :send-fn ; ChannelSocket's send API fn
-       connected-uids                        :connected-uids} ; Watchable, read-only atom
+(comfy/defs {ring-ajax-post                   :ajax-post-fn
+             ring-ajax-get-or-ws-handshake    :ajax-get-or-ws-handshake-fn
+             receive                          :ch-recv ; ChannelSocket's receive channel
+             ^{:arglists '([id event])} send! :send-fn ; ChannelSocket's send API fn
+             connected-uids                   :connected-uids} ; Watchable, read-only atom
   (sente/make-channel-socket! sente-web-server-adapter {}))
 ```
 
-##### `str->int` and `str->dec`
+#### `str->int` and `str->dec`
 
-Easy and portable parsing of integers and decimals. Returns `nil` when given a
+Easy and portable parsing of integers and decimals. Return `nil` when given a
 string with the wrong format.
 
-##### But wait, there's more!
+#### `conj-some`, `assoc-some` and `assoc-in-some`
+
+Like their namesakes in `clojure.core`, but ignore nil values.
+
+#### `append` and `append-some`
+
+Append elements to a sequence.
+
+Unlike the other sequence functions the sequence is the first argument.
+That's because they operate on the sequence as a whole, and not on each individual element.
+
+In the vast majority of cases you should prefer using a vector and `conj`,
+but when writing macros you often want to append stuff to code (lists).
+(In this case lists and sequences are interchangeable.)
+
+```clojure
+(s/def ::foo-args
+  (s/cat :name symbol?, :docstring (s/? string?), :expr any?))
+
+(defmacro foo [& forms]
+  (let [{:keys [name docstring expr]} (s/conform ::foo-args forms)]
+    (comfy/append-some `(def) name docstring expr)))
+```
+
+#### But wait, there's more!
 
 Check out the [api docs](https://madstap.github.io/comfy/madstap.comfy.html).
 
