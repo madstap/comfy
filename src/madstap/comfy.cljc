@@ -2,7 +2,7 @@
   "A small collection of functions and macros that (mostly) wouldn't
   be out of place in clojure.core."
   (:refer-clojure :exclude [keep run! group-by for])
-  #?(:cljs (:require-macros [madstap.comfy :refer [for]]))
+  #?(:cljs (:require-macros [madstap.comfy :refer [for forv]]))
   (:require
    [clojure.string :as str]
    [clojure.spec.alpha :as s]
@@ -113,6 +113,8 @@
   ([f coll & colls]
    (apply sequence (keep f) (cons coll colls))))
 
+;;;;;;;;;;;;;;;;;;;;;
+;; Variations on for
 
 ;; This spec, and the specs that depend on it need the conditional
 ;; because :clojure.core.specs.alpha is not yet ported to cljs.
@@ -120,25 +122,18 @@
    (s/def ::seq-exprs
      (s/and vector?
             (s/* (s/alt :binding :clojure.core.specs.alpha/binding
-                        :let   (s/cat :k #{:let}   :bindings :clojure.core.specs.alpha/bindings)
-                        :when  (s/cat :k #{:when}  :expr any?)
-                        :while (s/cat :k #{:while} :expr any?)
-                        :into  (s/cat :k #{:into}  :coll any?)))
+                        :let       (s/cat :k #{:let}
+                                          :bindings :clojure.core.specs.alpha/bindings)
+                        :when-let  (s/cat :k #{:when-let}
+                                          :bindings :clojure.core.specs.alpha/bindings)
+                        :while-let (s/cat :k #{:while-let}
+                                          :bindings :clojure.core.specs.alpha/bindings)
+                        :do        (s/cat :k #{:do}    :expr any?)
+                        :when      (s/cat :k #{:when}  :expr any?)
+                        :while     (s/cat :k #{:while} :expr any?)
+                        :into      (s/cat :k #{:into}  :coll any?)))
             #(= :binding (ffirst %))
             #(>= 1 (count (keep (comp #{:into} key) %))))))
-
-(defn- into-coll
-  {:no-doc true}
-  [seq-exprs]
-  (->> seq-exprs (partition 2) (filter #(= :into (first %))) first second))
-
-(defn- remove-into-coll
-  {:no-doc true}
-  [seq-exprs]
-  (->> seq-exprs (partition 2) (remove #(= :into (first %))) (apply concat) vec))
-
-(def ^{:no-doc true, :private true}
-  parse-seq-exprs (juxt into-coll remove-into-coll))
 
 (defn join-seqs
   "Lazily concatenates a sequence-of-sequences into a flat sequence."
@@ -148,17 +143,43 @@
    (when-let [s (seq seq-of-seqs)]
      (concat (first s) (join-seqs (rest s))))))
 
+(defn- into-coll
+  {:no-doc true}
+  [seq-exprs]
+  (->> seq-exprs (partition 2) (filter #(= :into (first %))) first second))
+
+(defn- expand-*-let
+  {:no-doc true}
+  [kw bindings]
+  (mapcat (fn [[binding expr]]
+            `[:let [temp# ~expr] ~kw temp# :let [~binding temp#]])
+          (partition 2 bindings)))
+
+(defn- parse-expr
+  {:no-doc true}
+  [[k v :as seq-expr]]
+  (case k
+    :into nil
+    :do [:let [(gensym) v]]
+    :when-let (expand-*-let :when v)
+    :while-let (expand-*-let :while v)
+    seq-expr))
+
+(defn- parse-exprs
+  {:no-doc true}
+  [exprs]
+  (into [] (mapcat parse-expr) (partition 2 exprs)))
+
+(def ^:no-doc ^:private parse-seq-exprs
+  (juxt into-coll parse-exprs))
+
 
 #?(:clj
    (s/fdef for
      :args (s/cat :seq-exprs ::seq-exprs, :expr any?)))
 
 (defmacro for
-  "Like core/for, but adds :into as a supported modifier.
-
-  :into specifies a collection which each element from the sequence
-  will be added to using conj. It makes for eager instead of lazy
-  and can only be specified once.
+  "Like core/for, but adds :do, :when-let and :while-let modifiers.
 
   A drop-in replacement for core/for."
   {:style/indent 1, :added "1.0.1"}
@@ -191,10 +212,8 @@
      :args (s/cat :seq-exprs ::seq-exprs, :body any?)))
 
 (defmacro forv
-  "DEPRECATED: Use (comfy/for [,,, :into []] ,,,) instead.
-
-  Like for, but returns a vector. Not lazy."
-  {:style/indent 1, :added "0.1.0", :deprecated "1.0.1"}
+  "Like for, but returns a vector. Not lazy."
+  {:style/indent 1, :added "0.1.0"}
   [seq-exprs body-expr]
   `(vec (for ~seq-exprs ~body-expr)))
 
@@ -204,12 +223,10 @@
      :args (s/cat :seq-exprs ::seq-exprs, :key-expr any?, :val-expr any?)))
 
 (defmacro for-map
-  "DEPRECATED: Use (comfy/for [,,, :into {}] [k-expr v-expr]) instead.
-
-  Like for, but takes a key and value expression and returns a map.
+  "Like for, but takes a key and value expression and returns a map.
   Multiple equal keys are treated as if by repeated assoc (last one wins).
   Not lazy."
-  {:style/indent 1, :added "0.1.0", :deprecated "1.0.1"}
+  {:style/indent 1, :added "0.1.0"}
   [seq-exprs key-expr val-expr]
   `(into {} (for ~seq-exprs [~key-expr ~val-expr])))
 
@@ -218,11 +235,9 @@
      :args (s/cat :seq-exprs ::seq-exprs, :body-expr any?)))
 
 (defmacro forcatv
-  "DEPRECATED: Use (comfy/forcat [,,, :into []] ,,,) instead.
-
-  Like for, but presumes that the body-expr evaluates to a seqable thing,
+  "Like for, but presumes that the body-expr evaluates to a seqable thing,
   and returns a vector of every element from each body. Not lazy."
-  {:style/indent 1, :added "0.2.0", :deprecated "1.0.1"}
+  {:style/indent 1, :added "0.2.0"}
   [seq-exprs body-expr]
   `(into [] cat (for ~seq-exprs ~body-expr)))
 
@@ -553,7 +568,7 @@
    :style/indent 1}
   [binding body]
   `(let [~binding ~body]
-     ~(for [sym (syms-in-binding binding), :into []]
+     ~(forv [sym (syms-in-binding binding)]
         `(def ~sym ~sym))))
 
 
