@@ -620,6 +620,18 @@
   take-while-distinct (partial take-while-distinct-by identity))
 
 
+(defn sentinel
+  "Returns something that is only equal to itself."
+  {:added "1.0.3"}
+  [] #?(:clj (Object.), :cljs (js-obj)))
+
+
+(defn sentinels
+  "Returns an infinite sequence of distinct sentinels."
+  {:added "1.0.3"}
+  [] (repeatedly sentinel))
+
+
 (s/fdef map-all
   :args (s/cat :f ifn?, :colls (s/+ seqable?))
   :ret seq?)
@@ -630,9 +642,10 @@
   {:added "1.0.0"
    :arglists '([f coll & colls])}
   [f & colls]
-  (->> (map #(concat % (repeat ::none)) colls)
-       (apply map (fn [& args]
-                    (if (every? #{::none} args)
-                      ::stop
-                      (apply f (replace {::none nil} args)))))
-       (take-while (complement #{::stop}))))
+  (let [[none stop] (sentinels)]
+    (->> (map #(concat % (repeat none)) colls)
+         (apply map (fn [& args]
+                      (if (every? #{none} args)
+                        stop
+                        (apply f (replace {none nil} args)))))
+         (take-while (complement #{stop})))))
