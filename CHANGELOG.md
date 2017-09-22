@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file. This change
 
 ## [Unreleased]
 
+### Added
+
+- sentinel and sentinels
+
+- add :do, :when-let and :while-let modifiers to for and for-likes
+
+### Deprecated
+
+- :into as a for modifier
+
+### Un-Deprecated
+
+- Resurrect forv, for-map and forcatv
+
 ## [1.0.2] - 2017-09-14
 
 ### Added
