@@ -341,7 +341,9 @@
 
   A drop-in replacement for core/group-by."
   {:added "0.1.1"}
-  ([f coll] (clojure.core/group-by f coll))
+  ([f coll]
+   (clojure.core/group-by f coll)
+   #_(group-by f identity coll))
   ([f xform coll]
    (group-by f xform conj coll))
   ([f xform rf coll]
@@ -351,21 +353,26 @@
    ;; rf* => the transduced rf (for each key)
    ;; res => result (for each key)
    ;; rfs => reducing functions
-   (let [[acc rfs] (reduce (fn [[acc rfs] x]
-                             (let [k (f x)
-                                   res (get acc k init)
+   ;; acc => the map that's built up and returned at the end
+   (let [[acc rfs] (reduce
+                    (fn [[acc rfs] x]
+                      (let [k (f x)
+                            res (get acc k init)
 
-                                   ;; These conditionals are for perf reasons,
-                                   ;; to not do more work than necessary.
-                                   rf-maybe (get rfs k)
-                                   existing-rf? (boolean rf-maybe)
-                                   rf* (if existing-rf? rf-maybe (xform rf))
-                                   rfs (if existing-rf? rfs (assoc rfs k rf*))]
+                            ;; These conditionals are for perf reasons.
+                            ;; I could just do
+                            ;; (get rfs k (xform rf)) and (assoc rfs k rf*)
+                            ;; but that's apparently way slower
+                            ;; (based on very limited benchmarking at the repl)
+                            rf-maybe (get rfs k)
+                            existing-rf? (boolean rf-maybe)
+                            rf* (if existing-rf? rf-maybe (xform rf))
+                            rfs (if existing-rf? rfs (assoc rfs k rf*))]
 
-                               (if (reduced? res)
-                                 [acc rfs]
-                                 [(assoc acc k (rf* res x)) rfs])))
-                           [{} {}], coll)]
+                        (if (reduced? res)
+                          [acc rfs]
+                          [(assoc acc k (rf* res x)) rfs])))
+                    [{} {}], coll)]
      (into {}
            (map (fn [[k res]]
                   [k ((rfs k) (unreduced res))]))
@@ -441,9 +448,7 @@
 ;; * Using (rf) is not very useful as in most cases you would write an inline anon fn.
 ;; * I can always add this later if I feel like it,
 ;;   but I couldn't remove it or change it without breaking code.
-;;   (The "kick the can down the road" methodology of software development.)
 
-;; Can probably be optimized some, the current version is the simplest thing that works.
 (defn reduce*
   "Version of reduce that, if reduced, returns the value still wrapped in reduced.
   Needed to pass a reduced value upwards through nested collections
@@ -537,22 +542,20 @@
    :added "0.2.3"}
   [b]
   (letfn [(simple-symbol [sym]
-            (with-meta (symbol (name sym)) (meta sym)))]
-    (prewalk-reduce (fn [acc x]
-                      (cond (symbol? x)
-                            (conj acc (simple-symbol x))
+            (with-meta (symbol (name sym)) (meta sym)))
+          (map-entry?* [x]
+            #?(:clj (map-entry? x), :cljs (and (vector? x) (two? (count x)))))]
+    (prewalk-reduce
+     (fn [acc x]
+       (cond (symbol? x)
+             (conj acc (simple-symbol x))
 
-                            ;;; Special-case:
-                            ;;   Keywords act like symbols in {:keys [:foo :bar/baz]}
-                            (and #?(:clj (map-entry? x)
-                                    :cljs (and (vector? x) (two? (count x))))
-                                 (= :keys (first x)))
-                            (into acc
-                                  (comp (filter keyword?) (map simple-symbol))
-                                  (second x))
+             ;; Special-case: Keywords act like symbols in {:keys [:foo :bar/baz]}
+             (and (map-entry?* x) (= :keys (first x)))
+             (into acc (comp (filter keyword?) (map simple-symbol)) (second x))
 
-                            :else acc))
-                    [], b)))
+             :else acc))
+     [], b)))
 
 
 #?(:clj
