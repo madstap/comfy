@@ -466,42 +466,45 @@
 
 
 (s/fdef prewalk-reduce
-  :args (s/cat :rf ifn?, :init any?, :form any?))
+  :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
 
 (defn prewalk-reduce
   "Prewalk reduce.
   Performs a depth-first, pre-order traversal of form, calling rf on
-  init and each sub-form. Unlike reduce, an init value is required."
+  init and each sub-form. If init is not supplied (rf) will be used."
   {:added "1.0.0"}
-  [rf init form]
-  (letfn [(step [acc x]
-            (if (coll? x)
-              (let [acc' (rf acc x)]
-                (if (reduced? acc')
-                  acc'
-                  (reduce* step acc' x)))
-              (rf acc x)))]
-    (unreduced (step init form))))
+  ([rf form]
+   (prewalk-reduce rf (rf) form))
+  ([rf init form]
+   (letfn [(step [acc x]
+             (if (coll? x)
+               (let [acc' (rf acc x)]
+                 (if (reduced? acc')
+                   acc'
+                   (reduce* step acc' x)))
+               (rf acc x)))]
+     (unreduced (step init form)))))
 
 
 (s/fdef postwalk-reduce
-  :args (s/cat :rf ifn?, :init any?, :form any?))
+  :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
 
 (defn postwalk-reduce
   "Postwalk reduce.
   Performs a depth-first, post-order traversal of form calling rf on
-  init and each sub-form. Unlike reduce, an init value is required."
+  init and each sub-form. If init is not supplied (rf) will be used."
   {:added "1.0.0"}
-  [rf init form]
-  (letfn [(step [acc x]
-            (if (coll? x)
-              (let [acc' (reduce* step acc x)]
-                (if (reduced? acc')
-                  acc'
-                  (rf acc' x)))
-              (rf acc x)))]
-     (unreduced (step init form))))
-
+  ([rf form]
+   (postwalk-reduce rf (rf) form))
+  ([rf init form]
+   (letfn [(step [acc x]
+             (if (coll? x)
+               (let [acc' (reduce* step acc x)]
+                 (if (reduced? acc')
+                   acc'
+                   (rf acc' x)))
+               (rf acc x)))]
+     (unreduced (step init form)))))
 
 (s/fdef prewalk-transduce
   :args (s/cat :xform ifn?, :rf ifn?, :init (s/? any?), :form any?))
