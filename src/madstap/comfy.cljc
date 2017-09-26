@@ -128,11 +128,12 @@
                                           :bindings :clojure.core.specs.alpha/bindings)
                         :while-let (s/cat :k #{:while-let}
                                           :bindings :clojure.core.specs.alpha/bindings)
-                        :do        (s/cat :k #{:do}       :expr any?)
-                        :when      (s/cat :k #{:when}     :expr any?)
-                        :when-not  (s/cat :k #{:when-not} :expr any?)
-                        :while     (s/cat :k #{:while}    :expr any?)
-                        :into      (s/cat :k #{:into}     :coll any?)))
+                        :do        (s/cat :k #{:do}        :expr any?)
+                        :when      (s/cat :k #{:when}      :expr any?)
+                        :when-not  (s/cat :k #{:when-not}  :expr any?)
+                        :while     (s/cat :k #{:while}     :expr any?)
+                        :while-not (s/cat :k #{:while-not} :expr any?)
+                        :into      (s/cat :k #{:into}      :coll any?)))
             #(= :binding (ffirst %))
             #(>= 1 (count (keep (comp #{:into} key) %))))))
 
@@ -162,7 +163,8 @@
   (case k
     :into nil
     :do [:let [(gensym) v]]
-    :when-not [:when `(not ~v)]
+    :when-not  [:when  `(not ~v)]
+    :while-not [:while `(not ~v)]
     :when-let (expand-*-let :when v)
     :while-let (expand-*-let :while v)
     seq-expr))
