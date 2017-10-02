@@ -130,25 +130,33 @@ I found the fact that the core versions can only take one collection quite surpr
 so I made versions without that limitation. When passed multiple collections,
 they behave like map.
 
-#### `for` and `forcat` with `:into` modifier
+#### `for`, `forv`, `forcat`, `forcatv` and `for-map` with additional modifiers
 
-`forcat` is to `for` as `mapcat` is to `map`
+`forv` and `forcat` is to `for` as `mapv` and `mapcat` is to map.
 
-They can both take `:into` as a modifier, which will _eagerly_ conj the elements
-onto the specified collection.
+`for-map` builds a map and takes two expressions in the body,
+for each key and value in the resulting map.
+
+They can all take the additional modifiers `:do`, `:when-not`, `:when-let`, `:while-not` and`:while-let`.
+
+* `:do` performs an arbitrary side effect, mostly for debugging purposes.
+* `:when-not` and `:while-not` are the opposites of `:when` and `:while`.
+* `[,,, :when-let [[x y] (foo)]]` translates to
+`[:let [temp (foo)] :when temp :let [[x y] temp]]`, ditto for `:while-let`.
+
 
 ```clojure
-(comfy/for [x (range 3), :into []]
+(comfy/forv [x (range 3)]
   (inc x))
 ;;=> [1 2 3]
 
-(comfy/for [x (range 3), :into {}]
-  [(str x) x])
+(comfy/for-map [x (range 3)]
+  (str x) x)
 ;;=> {"0" 0, "1" 1, "2" 2}
 
-(comfy/forcat [x (range 4), :into []]
+(comfy/forcat [x (range 4)]
   (range x))
-;;=> [0 0 1 0 1 2]
+;;=> (0 0 1 0 1 2)
 ```
 
 #### `defs`
