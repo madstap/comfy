@@ -549,12 +549,13 @@
             #?(:clj (map-entry? x), :cljs (and (vector? x) (two? (count x)))))]
     (prewalk-reduce
      (fn [acc x]
-       (cond (symbol? x)
+       (cond (and (symbol? x) (not= '& x))
              (conj acc (simple-symbol x))
 
              ;; Special-case: Keywords act like symbols in {:keys [:foo :bar/baz]}
              (and (map-entry?* x) (= :keys (first x)))
-             (into acc (comp (filter keyword?) (map simple-symbol)) (second x))
+             (into acc (comp (filter keyword?)
+                             (map simple-symbol)) (second x))
 
              :else acc))
      [], b)))
