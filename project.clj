@@ -1,4 +1,4 @@
-(defproject madstap/comfy "1.0.3-SNAPSHOT"
+(defproject madstap/comfy "1.0.3"
   :description "Clojure(script) utils"
   :url "http://example.com/madstap/comfy"
   :license {:name "Eclipse Public License"

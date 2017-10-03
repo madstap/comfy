@@ -3,11 +3,17 @@ All notable changes to this project will be documented in this file. This change
 
 ## [Unreleased]
 
+## [1.0.3] - 2017-10-02
+
+### Fixed
+
+- defs no longer makes a var from &
+
 ### Added
 
 - sentinel and sentinels
 
-- add :do, :when-let and :while-let modifiers to for and for-likes
+- add :do, :when-not, :while-not, :when-let and :while-let modifiers to for and for-likes
 
 ### Deprecated
 
