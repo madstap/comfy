@@ -4,8 +4,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
-                 [org.clojure/clojurescript "1.9.671" :scope "provided"]]
+  :dependencies [[org.clojure/clojure "1.9.0-beta1"]
+                 [org.clojure/clojurescript "1.9.946" :scope "provided"]]
 
   :plugins [[lein-codox "0.10.3"]
             [lein-cljsbuild "1.1.6"]
@@ -23,6 +23,7 @@
      :compiler {:output-to "target/main.js"
                 :output-dir "target"
                 :main madstap.comfy.test-runner
+                :process-shim false ; https://github.com/bensu/doo/pull/141     ¯\_(ツ)_/¯
                 :optimizations :simple}}}}
 
   :doo {:paths {:rhino "lein run -m org.mozilla.javascript.tools.shell.Main"}}
@@ -37,5 +38,5 @@
                         [org.clojure/test.check "0.10.0-alpha2"]
                         [org.clojure/tools.nrepl "0.2.10"]]
          :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
-   :test {:dependencies [[org.mozilla/rhino "1.7.7"]]}
-   :1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha17"]]}})
+   :test {:dependencies [[org.mozilla/rhino "1.7.7.2"]]}
+   :1.9 {:dependencies [[org.clojure/clojure "1.9.0-beta1"]]}})
