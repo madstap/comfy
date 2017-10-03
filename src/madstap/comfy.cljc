@@ -622,15 +622,13 @@
               (do (vswap! seen conj y)
                   (rf res x)))))))))
   ([f coll]
-   (let [seen (volatile! #{})]
-     (letfn [(step [coll]
-               (lazy-seq
-                (when-let [[x & xs] (seq coll)]
-                  (let [y (f x)]
-                    (when-not (contains? @seen y)
-                      (vswap! seen conj y)
-                      (cons x (step xs)))))))]
-       (step coll)))))
+   (letfn [(step [seen coll]
+             (lazy-seq
+              (when-let [[x & xs] (seq coll)]
+                (let [y (f x)]
+                  (when-not (contains? seen y)
+                    (cons x (step (conj seen y) xs)))))))]
+     (step #{} coll))))
 
 
 (s/fdef take-while-distinct
