@@ -1,10 +1,10 @@
-(defproject madstap/comfy "1.0.3"
+(defproject madstap/comfy "1.0.4"
   :description "Clojure(script) utils"
   :url "http://example.com/madstap/comfy"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojure "1.9.0-beta1"]
+  :dependencies [[org.clojure/clojure "1.9.0-beta2"]
                  [org.clojure/clojurescript "1.9.946" :scope "provided"]]
 
   :plugins [[lein-codox "0.10.3"]

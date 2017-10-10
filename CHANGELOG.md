@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file. This change
 
 ## [Unreleased]
 
+## [1.0.4] - 2017-10-09
+
+### Added
+
+- defs can take metadata on the binding form itself
+
 ## [1.0.3] - 2017-10-02
 
 ### Fixed
