@@ -544,7 +544,7 @@
    :added "0.2.3"}
   [b]
   (letfn [(simple-symbol [sym]
-            (with-meta (symbol (name sym)) (meta sym)))
+            (with-meta (symbol (name sym)) (merge (meta b) (meta sym))))
           (map-entry?* [x]
             #?(:clj (map-entry? x), :cljs (and (vector? x) (two? (count x)))))]
     (prewalk-reduce

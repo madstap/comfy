@@ -152,10 +152,14 @@
   (is (= [7 8] (do (comfy/defs {:keys [:x/foo4 x/bar4]} #:x{:foo4 7 :bar4 8})
                    [foo4 bar4])))
   (testing "supports metadata"
-    (is (do (comfy/defs [^:foo foo5] [42])
-            (:foo (meta #'foo5))))
-    (is (do (comfy/defs {:keys [^:foo foo6]} {:foo6 42})
-            (:foo (meta #'foo6))))))
+    (testing "on individual syms"
+      (is (do (comfy/defs [^:foo foo5] [42])
+              (:foo (meta #'foo5))))
+      (is (do (comfy/defs {:keys [^:foo foo6]} {:foo6 42})
+              (:foo (meta #'foo6)))))
+    (testing "on the whole binding"
+      (is (do (comfy/defs ^:foo [foo7 ^{:foo false} bar7] [1 2])
+              (and (:foo (meta #'foo7)) (false? (:foo (meta #'bar7)))))))))
 
 (deftest take-while-distinct-tests
   (testing "distinct"
