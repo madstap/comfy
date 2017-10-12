@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file. This change
 
 ## [Unreleased]
 
+### Added
+
+- prewalk/postwalk-reduce uses (rf) as the default init value
+
 ## [1.0.4] - 2017-10-09
 
 ### Added
