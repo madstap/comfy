@@ -444,13 +444,6 @@
 ;;;; Walk-reduce
 ;; Reduce and transduce versions of the functions in clojure.walk
 
-;; The reduce versions require the caller to supply an init value for multiple reasons.
-;; * Using the first value from form would complicate the code significantly,
-;;   be different between pre and post, and is not really very useful as the types are heterogenous.
-;; * Using (rf) is not very useful as in most cases you would write an inline anon fn.
-;; * I can always add this later if I feel like it,
-;;   but I couldn't remove it or change it without breaking code.
-
 (defn reduce*
   "Version of reduce that, if reduced, returns the value still wrapped in reduced.
   Needed to pass a reduced value upwards through nested collections
