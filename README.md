@@ -4,43 +4,6 @@ Some comfortable clojure(script) utils with no dependencies.
 
 Part general-purpose functions and macros, part syntax sugar.
 
-Starting at version one-point-oh, I won't change the meaning of stuff,
-preferring to introduce [new names and deprecating (but not deleting) old ones](https://www.youtube.com/watch?v=oyLBGkS5ICk).
-Accretion, not breakage.
-
-## Rationale
-
-There already exists a bunch of these util libraries for clojure.
-
-Here's an incomplete list of them:
-
-* [detritus](https://github.com/arrdem/detritus)
-* [encore](https://github.com/ptaoussanis/encore)
-* [medley](https://github.com/weavejester/medley)
-* [plumbing](https://github.com/plumatic/plumbing)
-* [suchwow](https://github.com/marick/suchwow)
-* [useful](https://github.com/flatland/useful)
-* [tupelo](https://github.com/cloojure/tupelo)
-
-So why another one? Well, mostly convenience. This one is mine,
-I can add whatever I need to it and cut releases whenever I feel like it.
-
-I can choose not to break anything, unlike detritus which says in it's readme
-"breaking changes will be frequent". Which is totally fine as long as it's
-honest about it, but I want something that I can just mindlessly
-upgrade without thinking.
-
-Also, importantly, no deps. Of the above libraries, I think only medley
-and detritus have no dependencies.
-
-I tend to add this lib and [medley](https://github.com/weavejester/medley)
-straight away to any new projects. One of them always seem to come in handy.
-medley has both the qualities that I described above;
-it probably won't ever break anything and has no dependencies.
-
-I have re-implemented or independently invented a lot of stuff that already
-exists in other libs, but won't add anything that's already in medley.
-
 ## Usage
 
 Requires a clojure version >= 1.9.0-alpha16
@@ -61,6 +24,10 @@ Require like this:
 ```
 
 In cljs `:require-macros` is not needed.
+
+Starting at version one-point-oh, I won't change the meaning of stuff,
+preferring to introduce [new names and deprecating (but not deleting) old ones](https://www.youtube.com/watch?v=oyLBGkS5ICk).
+Accretion, not breakage.
 
 There are a number functions and macros that are modified versions of the
 `clojure.core` ones of the same name. They only add capabilities to the
@@ -204,6 +171,41 @@ but when writing macros you often want to append stuff to code (lists).
 #### But wait, there's more!
 
 Check out the [api docs](https://madstap.github.io/comfy/madstap.comfy.html).
+
+
+## Rationale
+
+There already exists a bunch of these util libraries for clojure.
+
+Here's an incomplete list of them:
+
+* [detritus](https://github.com/arrdem/detritus)
+* [encore](https://github.com/ptaoussanis/encore)
+* [medley](https://github.com/weavejester/medley)
+* [plumbing](https://github.com/plumatic/plumbing)
+* [suchwow](https://github.com/marick/suchwow)
+* [useful](https://github.com/flatland/useful)
+* [tupelo](https://github.com/cloojure/tupelo)
+
+So why another one? Well, mostly convenience. This one is mine,
+I can add whatever I need to it and cut releases whenever I feel like it.
+
+I can choose not to break anything, unlike detritus which says in it's readme
+"breaking changes will be frequent". Which is totally fine as long as it's
+honest about it, but I want something that I can just mindlessly
+upgrade without thinking.
+
+Also, importantly, no deps. Of the above libraries, I think only medley
+and detritus have no dependencies.
+
+I tend to add this lib and [medley](https://github.com/weavejester/medley)
+straight away to any new projects. One of them always seem to come in handy.
+medley has both the qualities that I described above;
+it probably won't ever break anything and has no dependencies.
+
+I have re-implemented or independently invented a lot of stuff that already
+exists in other libs, but won't add anything that's already in medley.
+
 
 ## License
 
