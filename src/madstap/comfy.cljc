@@ -422,19 +422,12 @@
 ;;;; Walk-reduce
 ;; Reduce and transduce versions of the functions in clojure.walk
 
-(defn reduce*
-  "Version of reduce that, if reduced, returns the value still wrapped in reduced.
-  Needed to pass a reduced value upwards through nested collections
-  in pre- and postwalk reduce/transduce."
+;; Needed to pass a reduced value upwards through nested collections.
+(defn preserving-reduce
+  "Version of reduce that, if reduced, returns the value still wrapped in reduced."
   {:no-doc true}
   [rf init coll]
-  (if (empty? coll)
-    init
-    (let [acc (rf init (first coll))]
-      (if (reduced? acc)
-        acc
-        (recur rf acc (rest coll))))))
-
+  (reduce (#'clojure.core/preserving-reduced rf) init coll))
 
 (s/fdef prewalk-reduce
   :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
@@ -452,7 +445,7 @@
                (let [acc' (rf acc x)]
                  (if (reduced? acc')
                    acc'
-                   (reduce* step acc' x)))
+                   (preserving-reduce step acc' x)))
                (rf acc x)))]
      (unreduced (step init form)))))
 
@@ -469,7 +462,7 @@
   ([rf init form]
    (letfn [(step [acc x]
              (if (coll? x)
-               (let [acc' (reduce* step acc x)]
+               (let [acc' (preserving-reduce step acc x)]
                  (if (reduced? acc')
                    acc'
                    (rf acc' x)))
