@@ -21,7 +21,7 @@
   [& ms]
   (apply merge-with
          (fn [v1 v2]
-           (if (and (nilable-map? v1) (nilable-map? v2))
+           (if (every? nilable-map? [v1 v2])
              (deep-merge v1 v2)
              v2))
          ms))
@@ -36,7 +36,7 @@
   [f & ms]
   (apply merge-with
          (fn [v1 v2]
-           (if (and (nilable-map? v1) (nilable-map? v2))
+           (if (every? nilable-map? [v1 v2])
              (deep-merge-with f v1 v2)
              (f v1 v2)))
          ms))
