@@ -11,7 +11,6 @@
 
 (def ^:private nilable-map? (some-fn map? nil?))
 
-
 (s/fdef deep-merge
   :args (s/* (s/nilable map?))
   :ret (s/nilable map?))
@@ -26,7 +25,6 @@
              (deep-merge v1 v2)
              v2))
          ms))
-
 
 (s/fdef deep-merge-with
   :args (s/cat :f ifn?, :maps (s/* (s/nilable map?)))
@@ -43,7 +41,6 @@
              (f v1 v2)))
          ms))
 
-
 (s/fdef one? :args (s/cat :x number?), :ret boolean?)
 
 (defn one?
@@ -51,14 +48,12 @@
   {:added "0.1.0"}
   [x] (== 1 x))
 
-
 (s/fdef two? :args (s/cat :x number?), :ret boolean?)
 
 (defn two?
   "Returns true if x is two, else false."
   {:added "0.1.0"}
   [x] (== 2 x))
-
 
 (s/fdef conj-some
   :args (s/and (s/cat :coll (s/? (s/nilable coll?)) :xs (s/* any?))
@@ -77,20 +72,17 @@
   ([coll x & xs]
    (reduce conj-some coll (cons x xs))))
 
-
 (defmacro fn->
   "The same as #(-> % ~@forms)"
   {:added "0.1.0"}
   [& forms]
   `(fn [x#] (-> x# ~@forms)))
 
-
 (defmacro fn->>
   "The same as #(->> % ~@forms)"
   {:added "0.1.0"}
   [& forms]
   `(fn [x#] (->> x# ~@forms)))
-
 
 (s/fdef keep
   :args (s/cat :f ifn? :colls (s/* seqable?))
@@ -177,7 +169,6 @@
 (def ^:no-doc ^:private parse-seq-exprs
   (juxt into-coll parse-exprs))
 
-
 #?(:clj
    (s/fdef for
      :args (s/cat :seq-exprs ::seq-exprs, :expr any?)))
@@ -192,7 +183,6 @@
     (if coll
       `(into ~coll (clojure.core/for ~seq-ex ~expr))
       `(clojure.core/for ~seq-ex ~expr))))
-
 
 #?(:clj
    (s/fdef forcat
@@ -210,7 +200,6 @@
       `(into ~coll cat (clojure.core/for ~seq-ex ~expr))
       `(join-seqs (clojure.core/for ~seq-ex ~expr)))))
 
-
 #?(:clj
    (s/fdef forv
      :args (s/cat :seq-exprs ::seq-exprs, :body any?)))
@@ -220,7 +209,6 @@
   {:style/indent 1, :added "0.1.0"}
   [seq-exprs body-expr]
   `(vec (for ~seq-exprs ~body-expr)))
-
 
 #?(:clj
    (s/fdef for-map
@@ -245,7 +233,6 @@
   [seq-exprs body-expr]
   `(into [] cat (for ~seq-exprs ~body-expr)))
 
-
 (s/fdef flip
   :args (s/cat :f ifn? :args (s/* any?))
   :ret ifn?)
@@ -267,7 +254,6 @@
   [f & args]
   (fn [x] (apply f x args)))
 
-
 ;; Already in medley, but repeated here for symmetry with assoc-in-some
 (s/fdef assoc-some
   :args (s/cat :m (s/nilable associative?) :kvs (s/+ (s/cat :k any? :v any?)))
@@ -285,7 +271,6 @@
            (assoc-some m k v)
            (partition 2 kvs))))
 
-
 (s/fdef assoc-in-some
   :args (s/cat :m (s/nilable associative?) :ks sequential? :v any?)
   :ret (s/nilable associative?))
@@ -296,7 +281,6 @@
   {:added "0.1.1"}
   [m ks v]
   (if (some? v) (assoc-in m ks v) m))
-
 
 (s/fdef run!
   :args (s/cat :proc ifn? :colls (s/+ seqable?))
@@ -318,7 +302,6 @@
    (clojure.core/run! proc coll))
   ([proc coll & colls]
    (dorun (apply map proc (cons coll colls)))))
-
 
 (s/fdef group-by
   :args (s/cat :f ifn?
@@ -380,7 +363,6 @@
                   [k ((rfs k) (unreduced res))]))
            acc))))
 
-
 (s/fdef frequencies-by
   :args (s/cat :f ifn? :coll seqable?)
   :ret (s/map-of any? pos-int?))
@@ -393,7 +375,6 @@
   (reduce (fn [acc x]
             (update acc (f x) (fnil inc 0)))
           {}, coll))
-
 
 (defn strip-leading-zeroes
   {:no-doc true}
@@ -414,7 +395,6 @@
     #?(:clj (edn/read-string (strip-leading-zeroes s))
        :cljs (js/parseInt s 10))))
 
-
 (s/fdef str->dec
   :args (s/cat :s (s/nilable string?))
   :ret (s/nilable double?))
@@ -428,7 +408,6 @@
     #?(:clj (Double/parseDouble s)
        :cljs (js/parseFloat s))))
 
-
 (defmacro <<->
   "Turns a thread-last macro into a thread first one.
 
@@ -439,7 +418,6 @@
   {:added "0.2.3"}
   [& forms]
   `(-> ~(last forms) ~@(butlast forms)))
-
 
 ;;;; Walk-reduce
 ;; Reduce and transduce versions of the functions in clojure.walk
@@ -478,7 +456,6 @@
                (rf acc x)))]
      (unreduced (step init form)))))
 
-
 (s/fdef postwalk-reduce
   :args (s/cat :rf ifn?, :init (s/? any?), :form any?))
 
@@ -513,7 +490,6 @@
          res (prewalk-reduce f init form)]
      (f res))))
 
-
 (s/fdef postwalk-transduce
   :args (s/cat :xform ifn?, :rf ifn?, :init (s/? any?), :form any?))
 
@@ -527,7 +503,6 @@
    (let [f (xform rf)
          res (postwalk-reduce f init form)]
      (f res))))
-
 
 #?(:clj
    (s/fdef syms-in-binding
@@ -556,7 +531,6 @@
              :else acc))
      [], b)))
 
-
 #?(:clj
    (s/fdef defs
      :args (s/cat :binding :clojure.core.specs.alpha/binding-form, :body any?)
@@ -575,7 +549,6 @@
      ~(forv [sym (syms-in-binding binding)]
         `(def ~sym ~sym))))
 
-
 (s/fdef append
   :args (s/cat :coll seqable? :xs (s/* any?))
   :ret seq?)
@@ -586,7 +559,6 @@
   [coll & xs]
   (concat coll xs))
 
-
 (s/fdef append-some
   :args (s/cat :coll seqable? :xs (s/* any?))
   :ret seq?)
@@ -596,7 +568,6 @@
   {:added "1.0.0"}
   [coll & xs]
   (concat coll (remove nil? xs)))
-
 
 (s/fdef take-while-distinct-by
   :args (s/cat :f ifn? :coll (s/? seqable?))
@@ -626,7 +597,6 @@
                     (cons x (step (conj seen y) xs)))))))]
      (step #{} coll))))
 
-
 (s/fdef take-while-distinct
   :args (s/cat :coll (s/? seqable?))
   :ret (s/or :transducer ifn?, :coll (s/and seq? (partial apply distinct?))))
@@ -636,18 +606,15 @@
        :doc "Take items until an item repeats (not inclusive)."}
   take-while-distinct (partial take-while-distinct-by identity))
 
-
 (defn sentinel
   "Returns something that is only equal to itself."
   {:added "1.0.3"}
   [] #?(:clj (Object.), :cljs (js-obj)))
 
-
 (defn sentinels
   "Returns an infinite sequence of distinct sentinels."
   {:added "1.0.3"}
   [] (repeatedly sentinel))
-
 
 (s/fdef map-all
   :args (s/cat :f ifn?, :colls (s/+ seqable?))
