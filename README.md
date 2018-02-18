@@ -6,13 +6,17 @@ Part general-purpose functions and macros, part syntax sugar.
 
 ## Usage
 
-Requires a clojure version >= 1.9.0-alpha16
+Requires a clojure version >= 1.9.0
 and/or a clojurescript version >= 1.9.542
 
-Add this to your `:dependencies`
+Dependency coordinates
 
 ```clojure
-[madstap/comfy "1.0.4"]
+;; deps.edn
+madstap/comfy {:mvn/version "1.0.5"}
+
+;; :dependencies
+[madstap/comfy "1.0.5"]
 ```
 
 Require like this:
@@ -40,7 +44,7 @@ originals while maintaining compatibility, so it's safe to do the following.
   [madstap.comfy :refer [for group-by keep run!]))
 ```
 
-(At least as of the 1.9.0 alphas. I can imagine future changes to `clojure.core`
+(At least as of 1.9.0, I can imagine future changes to `clojure.core`
 breaking this assumption, but consider it unlikely.)
 
 Functions with `:no-doc` metadata are considered implementation

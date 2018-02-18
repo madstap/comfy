@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file. This change
 
 ## [Unreleased]
 
+## [1.0.5] - 2018-02-17
+
 ### Added
 
 - prewalk/postwalk-reduce uses (rf) as the default init value
+
+- add cond-doto
 
 ## [1.0.4] - 2017-10-09
 
