@@ -626,3 +626,19 @@
                         stop
                         (apply f (replace {none nil} args)))))
          (take-while (complement #{stop})))))
+
+(s/fdef cond-doto
+  :args (s/cat :expr any?, :clauses (s/* (s/cat :test any?, :form any?))))
+
+(defmacro cond-doto
+  "Takes an expression and test/form pairs. Evaluates expr and for
+  each truthy test evaluates the corresponding form as if in a doto,
+  with expr at the front of the arguments. Returns the value of expr."
+  {:added "1.0.5"
+   :style/indent 1}
+  [expr & clauses]
+  (let [x (gensym)]
+    `(let [~x ~expr]
+       ~@(for [[test step] (partition 2 clauses)]
+           `(when ~test (doto ~x ~step)))
+       ~x)))

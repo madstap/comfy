@@ -177,3 +177,17 @@
 (deftest map-all-test
   (is (= '([0 0] [1 nil] [2 nil])
          (comfy/map-all vector (range 3) (range 1)))))
+
+(deftest cond-doto-test
+  (is (= {:foo 1}
+         @(comfy/cond-doto (atom {})
+            true (swap! assoc :foo 1)
+            false (swap! assoc :not-included 2))))
+
+  (is (= :x (comfy/cond-doto :x)))
+
+  (is (= {:foo 2}
+         @(comfy/cond-doto (atom {})
+            true (swap! assoc :foo 1)
+            false (reset! {})
+            true (swap! update :foo inc)))))
