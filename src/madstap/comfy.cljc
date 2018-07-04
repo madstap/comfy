@@ -642,3 +642,11 @@
        ~@(for [[test step] (partition 2 clauses)]
            `(when ~test (doto ~x ~step)))
        ~x)))
+
+(s/fdef invoke
+  :args (s/cat :f ifn?, :args (s/* any?)))
+
+(defn invoke
+  "Invokes the function f with args, if any."
+  [f & args]
+  (apply f args))

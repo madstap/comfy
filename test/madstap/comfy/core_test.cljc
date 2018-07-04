@@ -191,3 +191,12 @@
             true (swap! assoc :foo 1)
             false (reset! {})
             true (swap! update :foo inc)))))
+
+(deftest invoke-test
+  (is (= 1 (comfy/invoke inc 0)))
+  (is (= :foo (comfy/invoke (constantly :foo))))
+  (testing "Usage example"
+    (is (= :str (condp comfy/invoke "foo"
+                  number? :num
+                  string? :str
+                  (constantly true) :other)))))
