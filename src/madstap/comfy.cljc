@@ -190,9 +190,7 @@
 
 (defmacro forcat
   "A for variant that presumes the body evaluates to a seqable thing.
-  Returns a lazy sequence of all elements in each body.
-
-  Like comfy/for, accepts the :into modifier. (Which will make it non-lazy.)"
+  Returns a lazy sequence of all elements in each body."
   {:style/indent 1, :added "0.1.2"}
   [seq-exprs expr]
   (let [[coll seq-ex] (parse-seq-exprs seq-exprs)]
