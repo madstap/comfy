@@ -292,12 +292,18 @@
 
   Returns nil. Not lazy.
 
+  Arity one returns a mapping transducer that runs proc
+  on each element, while having no other effect
+  (ie, returns the element unchanged).
+
   When given multiple collections,
   proc will be called with number-of-colls arguments.
   Will go on for the length of the shortest collection.
 
   A drop-in replacement for core/run!."
   {:added "0.1.1"}
+  ([proc]
+   (map #(doto % proc)))
   ([proc coll]
    (clojure.core/run! proc coll))
   ([proc coll & colls]
