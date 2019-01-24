@@ -663,3 +663,22 @@
   "Like core/comp, but ignores nil values."
   [& fs]
   (apply clojure.core/comp (remove nil? fs)))
+
+(defn transduce-map [m xform]
+  (into (empty m) xform m))
+
+(defn map-vals [m f & args]
+  (transduce-map m (map (fn [[k v]]
+                          [k (apply f v args)]))))
+
+(defn map-keys [m f & args]
+  (transduce-map m (map (fn [[k v]]
+                          [(apply f k args) v]))))
+
+(defn filter-keys [m pred & args]
+  (transduce-map m (filter (fn [[k _]]
+                             (apply pred k args)))))
+
+(defn filter-vals [m pred & args]
+  (transduce-map m (filter (fn [[_ v]]
+                             (apply pred v args)))))
