@@ -654,3 +654,12 @@
   "Invokes the function f with args, if any."
   [f & args]
   (apply f args))
+
+(s/fdef comp
+  :args (s/* (s/nilable ifn?))
+  :ret fn?)
+
+(defn comp
+  "Like core/comp, but ignores nil values."
+  [& fs]
+  (apply clojure.core/comp (remove nil? fs)))
